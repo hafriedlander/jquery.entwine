@@ -125,6 +125,20 @@ var console;
 				// Copy static functions through from $ to this.$ so e.g. $.ajax still works
 				// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
 				$.extend(this.$, $);
+				
+				// We override concrete to inject the name of this namespace when defining blocks inside this namespace
+				var concrete_wrapper = this.injectee.concrete = function() {
+					var args = arguments;
+					
+					if (!args[0] || typeof args[0] != 'string') { args = $.makeArray(args); args.unshift(name); }
+					else if (args[0].charAt(0) != '.') args[0] = name+'.'+args[0];
+					
+					return $.fn.concrete.apply(this, args);
+				}
+				
+				this.$.concrete = function() {
+					concrete_wrapper.apply(null, arguments);
+				}
 			}
 		},
 		
@@ -304,11 +318,12 @@ var console;
 	 */
 	$.fn.concrete = function() {
 		var i = 0;
-		var selector = $.selector(this.selector);
+		var selector = this.selector ? $.selector(this.selector) : null;
 		
 		var namespace = namespaces.__base || Namespace();
 		if (typeof arguments[i] == 'string') {
-			namespace = namespaces[arguments[i]] || Namespace(arguments[i]);
+			if (arguments[i].charAt('0') == '.') arguments[i] = arguments[i].substr(1);
+			if (arguments[i]) namespace = namespaces[arguments[i]] || Namespace(arguments[i]);
 			i++;
 		}
 		
@@ -317,23 +332,30 @@ var console;
 			// If it's a function, call it - either it's a using block or it's a concrete definition builder
 			if ($.isFunction(res)) {
 				if (res.length != 1) warn('Function block inside concrete definition does not take $ argument properly', $.concrete.WARN_LEVEL_IMPORTANT);
-				res = res.call(this, namespace.$);
+				res = res.call(namespace.$(this), namespace.$);
 			}
-			else if (namespace.name != '__base') warn('Raw object inside namespaced ('+namespace.name+') concrete definition - namespace lookup will not work properly', $.concrete.WARN_LEVEL_IMPORTANT);
+			//else if (namespace.name != '__base') warn('Raw object inside namespaced ('+namespace.name+') concrete definition - namespace lookup will not work properly', $.concrete.WARN_LEVEL_IMPORTANT);
 				
 			// Now if we still have a concrete definition object, inject it into namespace
-			if (res) namespace.add(selector, res);
+			if (res) {
+				if (selector) namespace.add(selector, res);
+				else warn('Concrete block given to concrete call without selector. Make sure you call $(selector).concrete when defining blocks', $.concrete.WARN_LEVEL_IMPORTANT);
+			}
 			i++
 		}
 		
 		return namespace.$(this);
 	}
 	
+	$.concrete = function() {
+		$.fn.concrete.apply(null, arguments);
+	}
+	
 	/**
 	 * A couple of utility functions for accessing the store outside of this closure, and for making things
 	 * operate in a little more easy-to-test manner
 	 */
-	$.concrete = {
+	$.extend($.concrete, {
 		
 		/**
 		 * Get all the namespaces. Usefull for introspection? Internal interface of Namespace not guaranteed consistant
@@ -381,7 +403,7 @@ var console;
 		 * These events need the live-extensions plugin
 		 */
 		event_needs_extensions: { mouseenter: true, mouseleave: true, change: true, focusin: true, focusout: true }
-	}
+	});
 	
 	var check_id = null;
 

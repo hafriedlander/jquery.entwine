@@ -226,17 +226,46 @@ And the concrete definitions
 
 Then doing $('div').bar(); will _not_ display b. Even though the span rule could never match a div, because baz is defined for some rule in the foo namespace, the base namespace will never be checked
 
-h4. Forcing base
+h4. Cleaner namespace blocks
 
-In some situations (such as the last example) you may want to force using the base namespace. In this case you can call concrete without any arguments. For example, if the first definition in the previous example was
+When declaring a lot of namespaces, you can declare the namespace seperately from the concrete definitions, like so
 
 <pre><code>
-  $('div').concrete('foo', {
-    bar: function() { this.concrete().baz(); }
+  $.concrete('foo', function($){
+    $('div').concrete({
+      bar: function() { .. }
+    })
   })
 </code></pre>
 
-Then b _would_ be output to the console. It is up to the developer to decide when they need to be explicit about using the base namespace
+You can also nest declarations. In this next example, we're defining the functions $().concrete('zap').bar() and $().concrete('zap.pow').baz()
+
+<pre><code>
+  $.concrete('zap', function($){
+    $('div').concrete({
+      bar: function() { .. }
+    })
+    $.concrete('pow', function($){
+      $('div').concrete({
+        baz: function() { .. }
+      })
+    })
+  })
+</code></pre>
+
+h4. Calling to another namespace (and forcing base)
+
+Inside a namespace, namespace lookups are by default relative to the current namespace.
+
+In some situations (such as the last example) you may want to force using the base namespace. In this case you can call concrete with the first argument being the base namespace code '.'. For example, if the first definition in the previous example was
+
+<pre><code>
+  $('div').concrete('foo', {
+    bar: function() { this.concrete('.').baz(); }
+  })
+</code></pre>
+
+Then b _would_ be output to the console.
 
 h4. Using
 
