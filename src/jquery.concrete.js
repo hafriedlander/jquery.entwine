@@ -113,9 +113,7 @@ var console;
 			}
 			else {
 				// We're in a namespace, so we build a Class that subclasses the jQuery Object Class to inject namespace functions into
-				var subfn = function(jq){
-					this.selector = jq.selector; this.context = jq.context; this.setArray($.makeArray(jq));
-				}
+				var subfn = function(){}
 				this.injectee = subfn.prototype = new $();
 				
 				// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
