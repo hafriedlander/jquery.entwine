@@ -118,10 +118,14 @@ var console;
 				}
 				this.injectee = subfn.prototype = new $();
 				
-				// And then we provide an overriding $ that returns objects of our new Class
+				// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
 				this.$ = function() {
 					return new subfn($.apply(window, arguments));
 				}
+				this.injectee.pushStack = function(){
+					return new subfn($.fn.pushStack.apply(this, arguments));
+				}
+				
 				// Copy static functions through from $ to this.$ so e.g. $.ajax still works
 				// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
 				$.extend(this.$, $);
