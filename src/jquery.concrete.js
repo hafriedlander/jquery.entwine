@@ -119,11 +119,29 @@ var console;
 				this.injectee = subfn.prototype = new $();
 				
 				// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
-				this.$ = function() {
-					return new subfn($.apply(window, arguments));
+				var bound$ = this.$ = function(a) {
+					// Try the simple way first
+					var jq = $.fn.init.apply(new subfn(), arguments);
+					if (jq instanceof subfn) return jq;
+					
+					// That didn't return a bound object, so now we need to copy it
+					var rv = new subfn();
+					rv.selector = jq.selector; rv.context = jq.context; var i = rv.length = jq.length;
+					while (i--) rv[i] = jq[i];
+					return rv;
 				}
-				this.injectee.pushStack = function(){
-					return new subfn($.fn.pushStack.apply(this, arguments));
+				this.injectee.pushStack = function(elems, name, selector){
+					var ret = bound$(elems);
+
+					// Add the old object onto the stack (as a reference)
+					ret.prevObject = this;
+					ret.context = this.context;
+					
+					if ( name === "find" ) ret.selector = this.selector + (this.selector ? " " : "") + selector;
+					else if ( name )       ret.selector = this.selector + "." + name + "(" + selector + ")";
+					
+					// Return the newly-formed element set
+					return ret;
 				}
 				
 				// Copy static functions through from $ to this.$ so e.g. $.ajax still works
