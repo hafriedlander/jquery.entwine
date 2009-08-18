@@ -261,7 +261,7 @@ var console;
 			for (k in data) {
 				v = data[k];
 				
-				if ($.isFunction(v)) {
+				if ($.isFunction(v) && v !== $.property) {
 					if (k == 'onmatch' || k == 'onunmatch') {
 						this.bind_condesc(selector, k, v);
 					}
