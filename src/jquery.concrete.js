@@ -95,6 +95,17 @@ var console;
 		return rv;
 	}
 
+
+	var is_or_contains = document.compareDocumentPosition ?
+		function(a, b){
+			return a && b && (a == b || !!(a.compareDocumentPosition(b) & 16));
+		} : 
+		function(a, b){
+			return a && b && (a == b || (a.contains ? a.contains(b) : true));
+		} ;
+
+	$.support.bubblingChange = !($.browser.msie || $.browser.safari);
+		
 	var namespaces = {};
 
 	var Namespace = Base.extend({
@@ -223,15 +234,115 @@ var console;
 			}
 		},
 		
+		build_event_proxy: function(name) {
+			var one = this.one(name, 'func');
+			
+			var prxy = function(e, originalevent) {
+				e = originalevent || e;
+				
+				var el = e.target;
+				while (el && el != document && !e.isPropagationStopped()) {
+					one(el, arguments);
+					el = el.parentNode;
+				}
+			};
+			
+			return prxy;
+		},
+		
+		build_mouseenterleave_proxy: function(name) {
+			var one = this.one(name, 'func');
+			
+			var prxy = function(e) {
+				var el = e.target;
+				var rel = e.relatedTarget;
+				
+				while (el && el != document && !e.isPropagationStopped()) {
+					/* We know el contained target. If it also contains relatedTarget then we didn't mouseenter / leave. What's more, every ancestor will also
+					contan el and rel, and so we can just stop bubbling */
+					if (is_or_contains(el, rel)) break;
+					
+					one(el, arguments);
+					el = el.parentNode;
+				}
+			};
+			
+			return prxy;
+		},
+		
+		build_change_proxy: function(name) {
+			var one = this.one(name, 'func');
+			
+			var prxy = function(e) {
+				var el = e.target;
+				// If this is a keydown event, only worry about the enter key, since browsers only trigger onchange on enter or focus loss
+				if (e.type === 'keydown' && e.keyCode !== 13) return;
+				// Make sure this is event is for an input type we're interested in
+				if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT') return;
+					
+				var $el = $(el), nowVal, oldVal = $el.data('changeVal');
+			
+				// Detect changes on checkboxes & radiobuttons, which have different value logic. We don't use el.value, since el is part
+				// of a set, and we only want to raise onchange once for a single user action.
+				if (el.type == 'checkbox' || el.type == 'radio') {
+					if (!el.disabled && e.type === 'click') {
+						nowVal = el.checked;
+						// If radio, we get two changes - the activation, and the deactivation. We only want to fire one change though
+						if ((el.type === 'checkbox' || nowVal === true) && oldVal !== nowVal) e.type = 'change';
+					}
+				}
+				// Detect changes on other input types. In this case value is OK.
+				else {
+					nowVal = el.value;
+					if (oldVal !== undefined && oldVal !== nowVal) e.type = 'change';
+				}
+			
+				// Save the current value for next time
+				if (nowVal !== undefined) $el.data('changeVal', nowVal);
+			
+				// And if we decided that a change happened, do the actual triggering
+				if (e.type == 'change') {
+					while (el && el != document && !e.isPropagationStopped()) {
+						one(el, arguments);
+						el = el.parentNode;
+					}
+				}
+			};
+			
+			return prxy;
+		},
+		
 		bind_event: function(selector, name, func, event) {
 			var funcs = this.store[name] || (this.store[name] = []) ;
 			
 			var rule = funcs[funcs.length] = Rule(selector, name); rule.func = func;
 			funcs.sort(Rule.compare);
 			
-			if (!funcs.proxy) { 
-				funcs.proxy = this.build_proxy(name);
-				$(selector.selector).live(event, funcs.proxy);
+			if (!funcs.proxy) {
+				switch (name) {
+					case 'onmouseenter':
+						funcs.proxy = this.build_mouseenterleave_proxy(name);
+						event = 'mouseover';
+						break;
+					case 'onmouseleave':
+						funcs.proxy = this.build_mouseenterleave_proxy(name);
+						event = 'mouseout';
+						break;
+					case 'onchange':
+						if (!$.support.bubblingChange) {
+							funcs.proxy = this.build_change_proxy(name);
+							event = 'click focusin focusout keydown';
+						}
+						break;
+					case 'onsubmit':
+						event = 'delegated_submit';
+					case 'onfocus':
+					case 'onblur':
+						warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
+				}
+				
+				if (!funcs.proxy) funcs.proxy = this.build_event_proxy(name);
+				$(document).bind(event, funcs.proxy);
 			}
 		},
 		
@@ -283,17 +394,6 @@ var console;
 					}
 					else if (match = k.match(/^on(.*)/)) {
 						event = match[1];
-						
-						if (!$.fn.liveHover && $.concrete.event_needs_extensions[event]) {
-							warn('Event '+event+' requires live-extensions to function, which does not seem to be present', $.concrete.WARN_LEVEL_IMPORTANT);
-						}
-						else if (event == 'submit') {
-							warn('Event submit not currently supported', $.concrete.WARN_LEVEL_IMPORTANT);
-						}
-						else if (event == 'focus' || event == 'blur') {
-							warn('Event '+event+' not supported - use focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
-						}
-						
 						this.bind_event(selector, k, v, event);
 					}
 					else {
@@ -418,14 +518,12 @@ var console;
 		 * Warning level. Set to a higher level to get warnings dumped to console.
 		 */
 		warningLevel: 0,
-		
-		/**
-		 * These events need the live-extensions plugin
-		 */
-		event_needs_extensions: { mouseenter: true, mouseleave: true, change: true, focusin: true, focusout: true }
 	});
 	
-	var check_id = null;
+	// 
+	var check_id = null; // The timer handle for the asyncronous matching call
+	var form_binding_cache = $([]); // A cache for already-handled form elements
+	var delegate_submit = function(e){ $(document).triggerHandler('delegated_submit', e); } // The function that handles the delegation
 
 	/**
 	 * Finds all the elements that now match a different rule (or have been removed) and call onmatch on onunmatch as appropriate
@@ -474,6 +572,13 @@ var console;
 				}
 			}
 		}
+		
+		// As a special case, find all forms and bind onsubmit to trigger on the document too. This is the only event that can't be grabbed via delegation.
+		var forms = $('form');
+		// Only bind to forms we haven't processed yet
+		forms.not(form_binding_cache).bind('submit', delegate_submit);
+		// Then remember the current set of forms
+		form_binding_cache = forms;
 		
 		check_id = null;
 	}
