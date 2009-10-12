@@ -1,6 +1,6 @@
 $(function(){
 	
-	$('head').append("<link href='_tutorial.css' rel='stylesheet' type='text/css'></link>");
+	$('head').append("<link href='tutorial.css' rel='stylesheet' type='text/css'></link>");
 	
 	$('head').append("<script type='text/javascript' src='../js/codemirror/codemirror.js'></script>");
 	$('head').append("<script type='text/javascript' src='../js/codemirror/mirrorframe.js'></script>");
