@@ -1,0 +1,24 @@
+h1 a {
+	font-size: 14px;
+	color: #644; 
+}
+
+iframe {
+	margin: 2em 150px 1em 0; padding-bottom: 1em;
+	border-bottom: 2px solid #666 !important ;
+}
+
+.buttons {
+	float: right;
+	margin: 0;
+	overflow: hidden;
+}
+
+.buttons input {
+	float: right;
+	clear: right;
+}
+
+.buttons br {
+	margin: 0.25em 0;
+}

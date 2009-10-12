@@ -1,0 +1,119 @@
+<html>
+	<head>
+		<!-- No changes here -->
+		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
+		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		
+		<!-- Or here -->
+		<style type='text/css'>
+			body {
+				font: 11px Arial, sans;
+			}
+			ul {
+				list-style: none; padding: 0; margin: 0;
+			}
+			li {
+				padding: 0; margin: 0; 
+				background: #ccc; border-bottom: 5px solid white; 
+				float: left;
+				overflow: hidden;
+				width: 200px; height: 100px;
+			}
+			ul.horizontal li {
+				border-right: 5px solid white;
+			}
+			ul.horizontal li h2 {
+				float: left;
+				-moz-transform: rotate(-90deg);
+				-webkit-transform: rotate(-90deg);
+			}
+			ul.horizontal li p {
+				margin-left: 45px;
+			}
+		</style>
+		
+		<!-- 
+		If you were paying attention to the last demo you would have spotted a bug. Because the mouseenter and mouseleave animations set the style directly 
+		on the element, swaping the class didn't revert the styling - this is due to element styles always overriding style sheet styles. We need a way to
+		programmatically revert some styles when the class changes.
+		
+		Enter onmatch - a combination between constructor and event, onmatch is called once everytime a DOM mutation means an element now matches a different
+		most-specific onmatch definition.
+		
+		What that means is that every time the 'horizontal' class is added to a ul, the 'ul.horizontal li' block's onmatch is called on every li within that list,
+		and every time it's removed the 'ul li' block's onmatch is called.
+		
+		This allows us to revert the styles that were set by the animations, giving us a bug-free transition between states.
+		-->
+		<script type='text/javascript'>
+			$('ul li').concrete({
+				onmatch: function(){
+					this.css({height: 45, width: 200, clear: 'left'});
+				},
+				expand: function() {
+					this.animate({height: 100}, {queue: false})
+				},
+				collapse: function() {
+					this.animate({height: 45}, {queue: false})
+				},
+				onmouseenter: function(){
+					this.expand();
+				},
+				onmouseleave: function(){
+					this.collapse();
+				}
+			})
+			$('ul.horizontal li').concrete({
+				onmatch: function(){
+					this.css({height: 100, width: 45, clear: 'none'});
+				},
+				expand: function(){
+					this.animate({width: 200}, {queue: false})
+				},
+				collapse: function(){
+					this.animate({width: 45}, {queue: false})
+				}
+			})
+			$('ul.lightens li').concrete({
+				Highlight: '#ced',
+				
+				onmouseenter: function(){
+					this.animate({backgroundColor: this.Highlight()}, {queue: false});
+					this._super();
+				},
+				onmouseleave: function(){
+					this.animate({backgroundColor: '#ccc'}, {queue: false});
+					this._super();
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<h1>Concrete: Onmatch <a href='step_08.html'>Next >></a></h1>
+		<p class='buttons'>
+			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
+			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul").addClass("horizontal");' value='Make horizontal' /><br />
+			<input type='button' onclick='javascript:$("ul").removeClass("horizontal");' value='Make vertical' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ecd");' value='I Like Pink' /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ced");' value="Man's Man" />
+		</p>
+		<ul class='lightens'>
+			<li><h2>Foo</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bar</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Baz</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bang</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+		</ul>
+	</body>
+</html>
+<script type='text/javascript' src='_tutorial.js'></script>

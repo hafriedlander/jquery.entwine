@@ -1,0 +1,117 @@
+<html>
+	<head>
+		<!-- No changes here -->
+		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
+		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		
+		<!-- But we've added quite a bit here. Specifically we've added extra styling for a horizontal menu, in addition to the vertical one we had before. -->
+		<style type='text/css'>
+			body {
+				font: 11px Arial, sans;
+			}
+			ul {
+				list-style: none; padding: 0; margin: 0;
+			}
+			li {
+				padding: 0; margin: 0; 
+				background: #ccc; border-bottom: 5px solid white; 
+				float: left; clear: left;
+				overflow: hidden;
+				width: 200px; height: 45px;
+			}
+			ul.horizontal li {
+				border-right: 5px solid white;
+				clear: none;
+				width: 45px; height: 100px;
+			}
+			ul.horizontal li h2 {
+				float: left;
+				-moz-transform: rotate(-90deg);
+				-webkit-transform: rotate(-90deg);
+			}
+			ul.horizontal li p {
+				margin-left: 45px;
+			}
+		</style>
+		
+		<!-- 
+		Vertical menus are great, but sometimes we'd like them to be horizontal. And we want the API to be the same. And we'd like to toggle between the two by
+		simply setting a class on the ul element. Ta da - this code does that.
+		
+		Specifically, we've added a third jQuery block in between the 'ul li' block and the 'ul.lightens li' block, which overrides the expand and collapse methods
+		with methods that animate horizontally instead of vertically. All you need to do to add the 'horizontal' class to the ul element.
+		
+		Just like in OO programming, even though the onmouseenter is in the 'ul li' block, the call to this.expand() will call the overriding function, because
+		the most specific function is calculated every time.
+		-->
+		<script type='text/javascript'>
+			$('ul li').concrete({
+				expand: function() {
+					this.animate({height: 100}, {queue: false})
+				},
+				collapse: function() {
+					this.animate({height: 45}, {queue: false})
+				},
+				onmouseenter: function(){
+					this.expand();
+				},
+				onmouseleave: function(){
+					this.collapse();
+				}
+			})
+			$('ul.horizontal li').concrete({
+				expand: function(){
+					this.animate({width: 200}, {queue: false})
+				},
+				collapse: function(){
+					this.animate({width: 45}, {queue: false})
+				}
+			})
+			$('ul.lightens li').concrete({
+				Highlight: '#ced',
+				
+				onmouseenter: function(){
+					this.animate({backgroundColor: this.Highlight()}, {queue: false});
+					this._super();
+				},
+				onmouseleave: function(){
+					this.animate({backgroundColor: '#ccc'}, {queue: false});
+					this._super();
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<h1>Concrete: Overriding functions <a href='step_07.html'>Next >></a></h1>
+		<!-- 
+		And here we've added the last of the buttons - two buttons that add and remove the 'horizontal' class from the ul element.
+		
+		Note that no other code is necessary. Just toggling the class does all the work.
+		-->
+		<p class='buttons'>
+			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
+			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul").addClass("horizontal");' value='Make horizontal' /><br />
+			<input type='button' onclick='javascript:$("ul").removeClass("horizontal");' value='Make vertical' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ecd");' value='I Like Pink' /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ced");' value="Man's Man" />
+		</p>
+		<ul class='lightens'>
+			<li><h2>Foo</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bar</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Baz</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bang</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+		</ul>
+	</body>
+</html>
+<script type='text/javascript' src='_tutorial.js'></script>

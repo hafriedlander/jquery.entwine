@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
+		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		
+		<style type='text/css'>
+			body {
+				font: 11px Arial, sans;
+			}
+			ul {
+				list-style: none; padding: 0; margin: 0;
+			}
+			li {
+				padding: 0; margin: 0; 
+				background: #ccc; border-bottom: 5px solid white; 
+				float: left;
+				overflow: hidden;
+				width: 200px; height: 100px;
+			}
+			ul.horizontal li {
+				border-right: 5px solid white;
+			}
+			ul.horizontal li h2 {
+				float: left;
+				-moz-transform: rotate(-90deg);
+				-webkit-transform: rotate(-90deg);
+			}
+			ul.horizontal li p {
+				margin-left: 45px;
+			}
+		</style>
+		
+		<script type='text/javascript'>
+			$('ul li').concrete({
+				onmatch: function(){
+					this.css({height: 45, width: 200, clear: 'left'});
+				},
+				expand: function() {
+					this.animate({height: 100}, {queue: false})
+				},
+				collapse: function() {
+					this.animate({height: 45}, {queue: false})
+				},
+				onmouseenter: function(){
+					this.expand();
+				},
+				onmouseleave: function(){
+					this.collapse();
+				}
+			})
+			$('ul.horizontal li').concrete({
+				onmatch: function(){
+					this.css({height: 100, width: 45, clear: 'none'});
+				},
+				expand: function(){
+					this.animate({width: 200}, {queue: false})
+				},
+				collapse: function(){
+					this.animate({width: 45}, {queue: false})
+				}
+			})
+			$('ul.lightens li').concrete({
+				Highlight: '#ced',
+				
+				onmouseenter: function(){
+					this.animate({backgroundColor: this.Highlight()}, {queue: false});
+					this._super();
+				},
+				onmouseleave: function(){
+					this.animate({backgroundColor: '#ccc'}, {queue: false});
+					this._super();
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<h1>jQuery.concrete introductory tutorial <a style='font-size:14px;color:#644' href='step_01.html'>Next >></a></h1>
+		<p>
+			Welcome to the jQuery.concrete introductory tutorial. We're going to work through several iterations of a piece of jQuery.concrete code to
+			get the animating accordion menu below. Although this accordion could easily be achieved using regular jQuery, the API to this accordion
+			is much nicer than a standard jQuery plugin. The code (in it's entirety) attached to each of the buttons on the right is:
+		</p>	
+		<pre><code style='font-size: 14px'>
+Expand all: $("ul li").expand();
+Collapse all: $("ul li").collapse();
+
+Make horizontal: $("ul").addClass("horizontal");
+Make vertical: $("ul").removeClass("horizontal");
+
+I Like Pink: $("ul li").setHighlight("#ecd");
+Man's Man: $("ul li").setHighlight("#ced");
+		</code></pre>
+		<p style='padding-bottom: 1em; border-bottom: 2px solid #666'>
+			Despite this, the actual accordion code itself is clean, self explanatory, easily extensible (even by third parties) and can be
+			made non-namespace polluting.
+		</p>
+		<p class='buttons'>
+			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
+			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul").addClass("horizontal");' value='Make horizontal' /><br />
+			<input type='button' onclick='javascript:$("ul").removeClass("horizontal");' value='Make vertical' />
+			<br /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ecd");' value='I Like Pink' /><br />
+			<input type='button' onclick='javascript:$("ul li").setHighlight("#ced");' value="Man's Man" />
+			<br /><br />
+		</p>
+		<ul class='lightens'>
+			<li><h2>Foo</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bar</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Baz</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bang</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+		</ul>
+	</body>
+</html>
+<link href='_tutorial.css' rel='stylesheet' type='text/css'></link>

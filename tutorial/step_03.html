@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<!-- Just one small change here - we want to animate colours, so we need a tiny bit of jQuery.UI to handle that -->
+		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
+		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
+		
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		
+		<!-- No change here -->
+		<style type='text/css'>
+			body { font: 11px Arial, sans; }
+			ul { list-style: none; padding: 0; margin: 0; }
+			li {
+				padding: 0; margin: 0; 
+				background: #ccc; border-bottom: 5px solid white; 
+				float: left; clear: left;
+				overflow: hidden;
+				width: 200px; height: 45px;
+			}
+		</style>
+		
+		<!--
+		Now this is interesting. We're defining two concrete blocks, and the second has a _more specific_ selector than the first. In jQuery.concrete
+		for each element, where there is more than one function definition by a given name, then function in the _most specific_ selector block is called.
+		
+		In this case, it means that if the ul has the class 'lightens', mouseenter and mouseleave events on the li elements will cause a color animation instead
+		of a height animation.
+		
+		Removing the 'lightens' class means the second concrete block no longer matches, and so mouseenter and mouseleave events will start causing a height animation
+		again.
+		
+		This calculation of the most specific function occurs on every call, so there is no delay, recalc(), rebind() or any other step neccesary between mutating the
+		DOM (changing a class, adding an element, etc), and having the right functions get called.
+		-->
+		<script type='text/javascript'>
+			$('ul li').concrete({
+				expand: function() {
+					this.animate({height: 100}, {queue: false})
+				},
+				collapse: function() {
+					this.animate({height: 45}, {queue: false})
+				},
+				onmouseenter: function(){
+					this.expand();
+				},
+				onmouseleave: function(){
+					this.collapse();
+				}
+			})
+			$('ul.lightens li').concrete({
+				onmouseenter: function(){
+					this.animate({backgroundColor: '#ced'}, {queue: false});
+				},
+				onmouseleave: function(){
+					this.animate({backgroundColor: '#ccc'}, {queue: false});
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<h1>Concrete: Overriding events <a href='step_04.html'>Next >></a></h1>
+		<p class='buttons'>
+			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
+			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
+		</p>
+		<!-- We've made one change here - we've added the 'lightens' class to the ul. Try removing it and see what happens. -->
+		<ul class='lightens'>
+			<li><h2>Foo</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bar</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Baz</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bang</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+		</ul>
+	</body>
+</html>
+<script type='text/javascript' src='_tutorial.js'></script>

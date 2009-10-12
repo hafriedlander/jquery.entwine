@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<!-- We start by adding in the required javascript libraries - first, jQuery -->
+		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
+		
+		<!-- Then jQuery.selector and it's dependancies -->
+		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
+		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
+		
+		<!-- Then jQuery.concrete -->
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		
+		<!-- Some simple styling -->
+		<style type='text/css'>
+			body { font: 11px Arial, sans; }
+			/* Make the list items structural rather than typographical */
+			ul { list-style: none; padding: 0; margin: 0; }
+			/* And make them organise themselves vertically */
+			li {
+				padding: 0; margin: 0; 
+				background: #ccc; border-bottom: 5px solid white; 
+				float: left; clear: left;
+				overflow: hidden;
+				width: 200px; height: 100px;
+			}
+		</style>
+		
+		<!-- Then we add a couple of concrete functions. At this stage they're very simple - just calls to jQuery#animate -->
+		<script type='text/javascript'>
+			$('ul li').concrete({
+				expand: function() {
+					this.animate({height: 100}, {queue: false})
+				},
+				collapse: function() {
+					this.animate({height: 45}, {queue: false})
+				}
+			})
+		</script>
+	</head>
+	<body>
+		<h1>Concrete: Basics <a href='step_02.html'>Next >></a></h1>
+		<!-- 
+		And here are the buttons that let a user call the expand and collapse function. 
+		As you can see, concrete functions look like any other jQuery object function. The big difference is that a concrete function knows
+		what sort of elements it should act on. If you change the functions to $("*").expand() and $("*").collapse(), it will still work exactly
+		the same, because the functions will only actually be called on elements matching the "ul li" selector defined in the concrete block.
+		-->
+		<p class='buttons'>
+			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
+			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
+		</p>
+		<!-- Here's the menu's contents. It's a pretty basic menu-as-an-unordered-list construct -->
+		<ul>
+			<li><h2>Foo</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bar</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Baz</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+			<li><h2>Bang</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce posuere urna leo.</p></li>
+		</ul>
+	</body>
+</html>
+<script type='text/javascript' src='_tutorial.js'></script>
