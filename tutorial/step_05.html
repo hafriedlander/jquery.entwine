@@ -4,13 +4,7 @@
 		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
 		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
 		
-		<script type='text/javascript' src='../js/jquery.selector/jquery.class.js'></script>
-		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.js'></script>
-		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.specifity.js'></script>
-		<script type='text/javascript' src='../js/jquery.selector/jquery.selector.matches.js'></script>
-		
-		<script type='text/javascript' src='../js/jquery.concrete/jquery.dat.js'></script>
-		<script type='text/javascript' src='../js/jquery.concrete/jquery.concrete.js'></script>
+		<script type='text/javascript' src='../js/jquery.concrete-latest.js'></script>
 		
 		<!-- Or here -->
 		<style type='text/css'>
@@ -29,7 +23,7 @@
 		Sometimes you want to add properties to a library - perhaps we'd like to allow the developer to specify which color is used as the highlight.
 		
 		In this situation you want to use properties. By convention (but not restriction), properties in jQuery.concrete start with a capital letter. They
-		are similar to the standard jQuery data() properties, but by pre-defining them, you can use the functions Property() to get the value and setProperty(value)
+		are similar to the standard jQuery data() properties, but by pre-defining them, you can use the functions getProperty() to get the value and setProperty(value)
 		to set the value.
 		
 		In this example we've added a property called 'Highlight', defaulting to green (#ced). 
@@ -53,7 +47,7 @@
 				Highlight: '#ced',
 				
 				onmouseenter: function(){
-					this.animate({backgroundColor: this.Highlight()}, {queue: false});
+					this.animate({backgroundColor: this.getHighlight()}, {queue: false});
 					this._super();
 				},
 				onmouseleave: function(){
