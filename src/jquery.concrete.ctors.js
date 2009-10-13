@@ -38,10 +38,14 @@
 		}
 	});
 	
-	$.concrete.Namespace.add_method_handler(30, function(selector, k, v){
-		if ($.isFunction(v) && (k == 'onmatch' || k == 'onunmatch')) {
-			this.bind_condesc(selector, k, v);
-			return true;
+	$.concrete.Namespace.addHandler({
+		order: 30,
+		
+		bind: function(selector, k, v) {
+			if ($.isFunction(v) && (k == 'onmatch' || k == 'onunmatch')) {
+				this.bind_condesc(selector, k, v);
+				return true;
+			}
 		}
 	});
 

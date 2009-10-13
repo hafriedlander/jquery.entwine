@@ -30,6 +30,7 @@ do \
   echo "/* $x */" >> $FILE
   echo >> $FILE
   cat $x >> $FILE
+  echo ';' >> $FILE
   echo >> $FILE
 done
 

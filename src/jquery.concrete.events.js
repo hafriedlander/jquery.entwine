@@ -131,11 +131,15 @@
 		}
 	});
 	
-	$.concrete.Namespace.add_method_handler(40, function(selector, k, v){
-		if ($.isFunction(v) && (match = k.match(/^on(.*)/))) {
-			event = match[1];
-			this.bind_event(selector, k, v, event);
-			return true;
+	$.concrete.Namespace.addHandler({
+		order: 40,
+		
+		bind: function(selector, k, v){
+			if ($.isFunction(v) && (match = k.match(/^on(.*)/))) {
+				event = match[1];
+				this.bind_event(selector, k, v, event);
+				return true;
+			}
 		}
 	});
 	

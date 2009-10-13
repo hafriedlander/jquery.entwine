@@ -17,7 +17,7 @@ describe 'Concrete'
       $('#a').concrete({
         Foo: null
       });
-	   $('.a').getFoo().should.be_null
+      $('.a').getFoo().should.be_null
     end
 
     it 'can define and set a basic property'
@@ -27,13 +27,51 @@ describe 'Concrete'
       $('.a').setFoo(1);
       $('.a').getFoo().should.equal 1
     end
-	 
+ 
     it 'can define a default value'
       $('#a').concrete({
         Foo: 1
       });
       $('.a').getFoo().should.equal 1
     end
-	
+
+    it 'should manage proprties in namespaces without clashing'
+      $('#a').concrete({
+        Foo: 1
+      });
+
+      $.concrete('test', function($){
+        $('#a').concrete({
+          Foo: 2
+        });
+      });
+
+      $('.a').getFoo().should.equal 1
+      $('.a').concrete('test').getFoo().should.equal 2
+
+      $('.a').setFoo(4);
+      $('.a').concrete('test').setFoo(8);
+
+      $('.a').getFoo().should.equal 4
+      $('.a').concrete('test').getFoo().should.equal 8
+    end
+
+    it 'should manage directly setting proprties in namespaces without clashing'
+      $('#a').concrete({
+        Foo: null
+      });
+
+      $.concrete('test', function($){
+        $('#a').concrete({
+          Foo: null
+        });
+      });
+
+      $('.a').concreteData('Foo', 4);
+      $('.a').concrete('test').concreteData('Foo', 8);
+
+      $('.a').concreteData('Foo').should.equal 4
+      $('.a').concrete('test').concreteData('Foo').should.equal 8
+    end
   end
 end

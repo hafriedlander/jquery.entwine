@@ -85,7 +85,7 @@ var console;
 		return list;
 	}
 
-	var method_handlers = [];
+	var handlers = [];
 	
 	/**
 	 * A Namespace holds all the information needed for adding concrete methods to a namespace (including the _null_ namespace)
@@ -140,17 +140,33 @@ var console;
 				$.extend(this.$, $);
 				
 				// We override concrete to inject the name of this namespace when defining blocks inside this namespace
-				var concrete_wrapper = this.injectee.concrete = function() {
+				var concrete_wrapper = this.injectee.concrete = function(spacename) {
 					var args = arguments;
 					
-					if (!args[0] || typeof args[0] != 'string') { args = $.makeArray(args); args.unshift(name); }
-					else if (args[0].charAt(0) != '.') args[0] = name+'.'+args[0];
+					if (!spacename || typeof spacename != 'string') { args = $.makeArray(args); args.unshift(name); }
+					else if (spacename.charAt(0) != '.') args[0] = name+'.'+spacename;
 					
 					return $.fn.concrete.apply(this, args);
 				}
 				
 				this.$.concrete = function() {
 					concrete_wrapper.apply(null, arguments);
+				}
+				
+				for (var i = 0; i < handlers.length; i++) {
+					var handler = handlers[i], builder;
+					
+					// Inject jQuery object method overrides
+					if (builder = handler.namespaceMethodOverrides) {
+						var overrides = builder(this);
+						for (var k in overrides) this.injectee[k] = overrides[k];
+					}
+					
+					// Inject $.concrete function overrides
+					if (builder = handler.namespaceStaticOverrides) {
+						var overrides = builder(this);
+						for (var k in overrides) this.$.concrete[k] = overrides[k];
+					}
 				}
 			}
 		},
@@ -220,8 +236,8 @@ var console;
 			for (var k in data) {
 				var v = data[k];
 				
-				for (var i = 0; i < method_handlers.length; i++) {
-					if (method_handlers[i].handler.call(this, selector, k, v)) break;
+				for (var i = 0; i < handlers.length; i++) {
+					if (handlers[i].bind && handlers[i].bind.call(this, selector, k, v)) break;
 				}
 			}
 		},
@@ -240,22 +256,24 @@ var console;
 	});
 	
 	/**
-	 * Method builders can be added to the namespace object. Each of the functions in this array is called with the namespace as this,
-	 * and the key and value from the method hash as arguments, until one of them returns true. This is how event and property handling
-	 * is added in
+	 * A handler is some javascript code that adds support for some time of key / value pair passed in the hash to the Namespace add method.
+	 * The default handlers provided (and included by default) are event, ctor and properties
 	 */
-	$.concrete.Namespace.add_method_handler = function(rank, func){
-		for (var i = 0; i < method_handlers.length && method_handlers[i].rank < rank; i++) { /* Pass */ }
-		method_handlers.splice(i, 0, {rank: rank, handler: func});
+	$.concrete.Namespace.addHandler = function(handler) {
+		for (var i = 0; i < handlers.length && handlers[i].order < handler.order; i++) { /* Pass */ }
+		handlers.splice(i, 0, handler);
 	}
 	
-	$.concrete.Namespace.add_method_handler(50, function(selector, k, v){
-		if ($.isFunction(v)) {
-			this.bind_proxy(selector, k, v);
-			return true;
+	$.concrete.Namespace.addHandler({
+		order: 50,
+		
+		bind: function(selector, k, v){
+			if ($.isFunction(v)) {
+				this.bind_proxy(selector, k, v);
+				return true;
+			}
 		}
 	});
-	
 
 	$.extend($.fn, {
 		/**

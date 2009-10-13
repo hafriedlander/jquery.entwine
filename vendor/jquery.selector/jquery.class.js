@@ -7,7 +7,10 @@
  * 
  * new-less Constructor: new Foo(arg) <-same as-> Foo(arg)
  */  	
-Base = (function(){
+
+var Base;
+
+(function(){
 	
 	var marker = {}, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 
@@ -69,6 +72,4 @@ Base = (function(){
 		
 		return Kls;
 	}; 
-
-	return Base;
 })();
