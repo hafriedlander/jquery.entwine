@@ -9,7 +9,7 @@
 			((this.tag && this.tag != '*') ? 1 : 0) + this.pseudo_els.length
 		];
 		$.each(this.nots, function(i,not){
-			var ns = not.specifity(); spec[0] += ns[0]; spec[1] += ns[1]; sspec[2] += ns[2]; 
+			var ns = not.specifity(); spec[0] += ns[0]; spec[1] += ns[1]; spec[2] += ns[2]; 
 		});
 		
 		return this.spec = spec;
