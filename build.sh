@@ -1,10 +1,16 @@
 #!/bin/sh
 
+# Get the version - a tag if possible, otherwise a short ref (not well tested code)
 VER=`git rev-parse --abbrev-ref=strict HEAD`
-FILE="dist/concrete.dist-$VER.js"
+if [ "$VER" = "master" ] ; then \
+	VER=`git show --pretty=format:"%h" --quiet`
+fi
+
+# Specify the output file's name
+FILE="dist/jquery.concrete-$VER.js"
 
 mkdir -p dist
-rm dist/concrete.dist-*.js
+rm dist/*.js
 
 echo "/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version $VER. */" > $FILE
 
@@ -26,6 +32,8 @@ do \
   cat $x >> $FILE
   echo >> $FILE
 done
+
+ln -s `basename "$FILE"` dist/jquery.concrete-latest.js
 
 # cp LICENSE /tmp/
 # cp $FILE /tmp/
