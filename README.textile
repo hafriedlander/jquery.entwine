@@ -10,6 +10,7 @@ h2. Getting Started
 
 * Walk through the "Tutorial":http://hafriedlander.github.com/jquery.concrete/tutorial/
 * Watch the "Screencast":http://www.vimeo.com/6353390 (shot during a introductory developer meeting at SilverStripe)
+* Join the "Google Group":http://groups.google.com/group/jquery-concrete and let us know what you think, or what other features you'd like to see
 
 h2. Basic use
 
