@@ -10,7 +10,7 @@ describe 'Concrete'
     end
    
     before_each
-		$.concrete.synchronous_mode();
+      $.concrete.synchronous_mode();
       $.concrete.clear_all_rules()
       $('#dom_test').html('<div id="a" class="a b c"></div>')
     end

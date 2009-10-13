@@ -1,24 +1,41 @@
 #!/bin/sh
 
-$VER = `git rev-parse HEAD`
+VER=`git rev-parse --abbrev-ref=strict HEAD`
+FILE="dist/concrete.dist-$VER.js"
 
-cp LICENSE /tmp/
-echo "/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version $VER. */" > /tmp/concrete.js
+mkdir -p dist
+rm dist/concrete.dist-*.js
 
-for x in vendor/jquery.selector/jquery.class.js vendor/jquery.selector/jquery.selector.js vendor/jquery.selector/jquery.selector.specifity.js vendor/jquery.selector/jquery.selector.matches.js src/jquery.dat.js src/jquery.concrete.js ; do \
-  echo >> /tmp/concrete.js
-  echo "/* $x */" >> /tmp/concrete.js
-  echo >> /tmp/concrete.js
-  cat $x >> /tmp/concrete.js
-  echo >> /tmp/concrete.js
+echo "/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version $VER. */" > $FILE
+
+for x in \
+	vendor/jquery.selector/jquery.class.js \
+	vendor/jquery.selector/jquery.selector.js \
+	vendor/jquery.selector/jquery.selector.specifity.js \
+	vendor/jquery.selector/jquery.selector.matches.js \
+	src/jquery.focusinout.js \
+	src/jquery.concrete.js \
+	src/jquery.concrete.dommaybechanged.js \
+	src/jquery.concrete.events.js \
+	src/jquery.concrete.ctors.js \
+	src/jquery.concrete.properties.js
+do \
+  echo >> $FILE
+  echo "/* $x */" >> $FILE
+  echo >> $FILE
+  cat $x >> $FILE
+  echo >> $FILE
 done
 
-git checkout dist
-mv /tmp/concrete.js .
-mv /tmp/LICENSE .
+# cp LICENSE /tmp/
+# cp $FILE /tmp/
 
-git add concrete.js
-git add LICENSE
-git commit -m "Update dist to master version $VER"
+# git checkout dist
+# mv /tmp/$FILE .
+# mv /tmp/LICENSE .
 
-git checkout master
+# git add $FILE
+# git add LICENSE
+# git commit -m "Update dist to master version $VER"
+
+# git checkout master
