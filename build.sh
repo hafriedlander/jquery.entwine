@@ -1,7 +1,11 @@
 #!/bin/sh
 
+VER=$1
+
 # Get the version - a tag if possible, otherwise a short ref (not well tested code)
-VER=`git rev-parse --abbrev-ref=strict HEAD`
+if [ "$VER " = " " ] ; then \
+	VER=`git rev-parse --abbrev-ref=strict HEAD`
+fi
 if [ "$VER" = "master" ] ; then \
 	VER=`git show --pretty=format:"%h" --quiet`
 fi
