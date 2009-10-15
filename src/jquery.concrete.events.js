@@ -26,7 +26,10 @@
 				
 				var el = e.target;
 				while (el && el != document && !e.isPropagationStopped()) {
-					one(el, arguments);
+					var ret = one(el, arguments);
+					if (ret !== undefined) e.result = ret;
+					if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+					
 					el = el.parentNode;
 				}
 			};
@@ -46,7 +49,10 @@
 					contan el and rel, and so we can just stop bubbling */
 					if (is_or_contains(el, rel)) break;
 					
-					one(el, arguments);
+					var ret = one(el, arguments);
+					if (ret !== undefined) e.result = ret;
+					if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+					
 					el = el.parentNode;
 				}
 			};
@@ -87,7 +93,10 @@
 				// And if we decided that a change happened, do the actual triggering
 				if (e.type == 'change') {
 					while (el && el != document && !e.isPropagationStopped()) {
-						one(el, arguments);
+						var ret = one(el, arguments);
+						if (ret !== undefined) e.result = ret;
+						if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+						
 						el = el.parentNode;
 					}
 				}
