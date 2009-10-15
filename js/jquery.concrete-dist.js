@@ -1,4 +1,4 @@
-/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version d3cfe69. */
+/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version . */
 
 /* vendor/jquery.selector/jquery.class.js */
 
@@ -285,7 +285,7 @@ var Base;
 			((this.tag && this.tag != '*') ? 1 : 0) + this.pseudo_els.length
 		];
 		$.each(this.nots, function(i,not){
-			var ns = not.specifity(); spec[0] += ns[0]; spec[1] += ns[1]; sspec[2] += ns[2]; 
+			var ns = not.specifity(); spec[0] += ns[0]; spec[1] += ns[1]; spec[2] += ns[2]; 
 		});
 		
 		return this.spec = spec;
@@ -1166,7 +1166,10 @@ var console;
 				
 				var el = e.target;
 				while (el && el != document && !e.isPropagationStopped()) {
-					one(el, arguments);
+					var ret = one(el, arguments);
+					if (ret !== undefined) e.result = ret;
+					if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+					
 					el = el.parentNode;
 				}
 			};
@@ -1186,7 +1189,10 @@ var console;
 					contan el and rel, and so we can just stop bubbling */
 					if (is_or_contains(el, rel)) break;
 					
-					one(el, arguments);
+					var ret = one(el, arguments);
+					if (ret !== undefined) e.result = ret;
+					if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+					
 					el = el.parentNode;
 				}
 			};
@@ -1227,7 +1233,10 @@ var console;
 				// And if we decided that a change happened, do the actual triggering
 				if (e.type == 'change') {
 					while (el && el != document && !e.isPropagationStopped()) {
-						one(el, arguments);
+						var ret = one(el, arguments);
+						if (ret !== undefined) e.result = ret;
+						if (ret === false) { e.preventDefault(); e.stopPropagation(); }
+						
 						el = el.parentNode;
 					}
 				}
@@ -1275,6 +1284,7 @@ var console;
 		order: 40,
 		
 		bind: function(selector, k, v){
+			var match, event;
 			if ($.isFunction(v) && (match = k.match(/^on(.*)/))) {
 				event = match[1];
 				this.bind_event(selector, k, v, event);

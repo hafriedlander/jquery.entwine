@@ -10,7 +10,7 @@ $(function(){
 		dataType: 'text',
 		success: function(text){
 			var src = text; var encoded = src.replace(/</g, '&lt;'); 
-			$('h1').after('<code>'+encoded+'</code>');
+			$('h1').after('<code><pre style="height:300px;overflow:auto;">'+encoded+'</pre></code>');
 			
 			var options = {
 				height: "300px",
@@ -18,16 +18,15 @@ $(function(){
 				autoMatchParens: true,
 				reindentOnLoad: false,
 				tabMode: "shift"
-			}
+			};
 			
 			$('code').each(function(){
-				var cm = new CodeMirror(CodeMirror.replace(this), $.extend(null, options, {
+				new CodeMirror(CodeMirror.replace(this), $.extend(null, options, {
 					content: src,
 					parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
-					stylesheet: ["../js/codemirror/xmlcolors.css", "../js/codemirror/csscolors.css", "../js/codemirror/base.css"],
+					stylesheet: ["../js/codemirror/xmlcolors.css", "../js/codemirror/csscolors.css", "../js/codemirror/base.css"]
 				}));
-			})
-			
+			});
 		}
 	});
 })
