@@ -72,7 +72,7 @@ describe 'Concrete'
       $(event.target).should.have_attr 'id', 'a'
     end
     
-    it 'passes event object'
+    it 'passes event trigger data'
       var data;
       $('#a').concrete({onfoo: function(e, d){data = d;} });
       $('#a').trigger('foo', {finger: 'left'});
