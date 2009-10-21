@@ -64,12 +64,19 @@ describe 'Concrete'
       [a, b].should.eql [2, 1]
     end
     
-    it 'should pass data'
-      var a = 0;
-      $('#a').concrete({onfoo: function(e){a = e.blah;} });
-      a.should.equal 0
-      $('#a').trigger('foo', {blah: 'hi'});
-      a.should.equal 'hi'
+    it 'passes event object'
+      var event;
+      $('#a').concrete({onfoo: function(e){event = e;} });
+      $('#a').trigger('foo');
+      event.should.have_prop 'type', 'foo'
+      $(event.target).should.have_attr 'id', 'a'
+    end
+    
+    it 'passes event object'
+      var data;
+      $('#a').concrete({onfoo: function(e, d){data = d;} });
+      $('#a').trigger('foo', {finger: 'left'});
+      data.finger.should.eql 'left'
     end
 	 
   end

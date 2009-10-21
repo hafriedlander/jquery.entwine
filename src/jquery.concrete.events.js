@@ -21,9 +21,8 @@
 		build_event_proxy: function(name) {
 			var one = this.one(name, 'func');
 			
-			var prxy = function(e, originalevent) {
-				e = originalevent || e;
-				
+			var prxy = function(e) {
+
 				var el = e.target;
 				while (el && el != document && !e.isPropagationStopped()) {
 					var ret = one(el, arguments);
