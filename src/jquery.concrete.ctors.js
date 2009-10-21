@@ -83,10 +83,12 @@
 					if (rule.cache) {
 						// Find the ones that are extra this time
 						add = res.not(rule.cache);
-						// Find the ones that are gone this time
-						rem = rule.cache.not(res);
-						// And call the desctructor on them
-						if (rem.length && dtor) ctors.onunmatchproxy(rem, j, dtor);
+						if (dtor) {
+  						// Find the ones that are gone this time
+  						rem = rule.cache.not(res);
+  						// And call the destructor on them
+  						if (rem.length) ctors.onunmatchproxy(rem, j, dtor);
+  					}
 					}
 					
 					// Call the constructor on the newly matched ones
