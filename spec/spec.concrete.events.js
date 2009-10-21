@@ -10,7 +10,7 @@ describe 'Concrete'
     end
    
     before_each
-		$.concrete.synchronous_mode();
+  		$.concrete.synchronous_mode();
       $.concrete.clear_all_rules()
       $('#dom_test').html('<div id="a" class="a b c"></div>')
     end
@@ -62,6 +62,14 @@ describe 'Concrete'
       [a, b].should.eql [0, 0]
       $('#a').trigger('foo')
       [a, b].should.eql [2, 1]
+    end
+    
+    it 'should pass data'
+      var a = 0;
+      $('#a').concrete({onfoo: function(e){a = e.blah;} });
+      a.should.equal 0
+      $('#a').trigger('foo', {blah: 'hi'});
+      a.should.equal 'hi'
     end
 	 
   end
