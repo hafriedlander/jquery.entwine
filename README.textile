@@ -298,7 +298,7 @@ This equivalent to /with/ in javascript, and just like /with/, care should be ta
 
 h2. Hacking
 
-Specs are written using the awesome JSpec library.  You can run them by opening `/spec/spec.html`.  
+Specs are written using the awesome "JSpec":http://github.com/visionmedia/jspec library.  You can run them by opening the file: `spec/spec.html`.  
 
 When developing, this command will rerun specs whenever you edit a file:
 
