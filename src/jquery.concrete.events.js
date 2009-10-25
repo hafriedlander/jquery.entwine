@@ -21,8 +21,15 @@
 		build_event_proxy: function(name) {
 			var one = this.one(name, 'func');
 			
-			var prxy = function(e) {
+			var prxy = function(e, data) {
 
+        // special case for 'submit'
+        if ( data && data._replace_event ) {
+          // e.stopPropagation();
+          e = data._replace_event;
+          delete data._replace_event;
+        }
+          
 				var el = e.target;
 				while (el && el != document && !e.isPropagationStopped()) {
 					var ret = one(el, arguments);
@@ -133,7 +140,10 @@
 						$.concrete.warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
 				}
 				
-				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
+        // Build generic event handling proxy
+				if (!proxies[name]) 
+				  proxies[name] = this.build_event_proxy(name);
+				  
 				$(document).bind(event, proxies[name]);
 			}
 		}
@@ -152,10 +162,15 @@
 		}
 	});
 	
-	// Find all forms and bind onsubmit to trigger on the document too. This is the only event that can't be grabbed via delegation.
+	// Find all forms and bind onsubmit to trigger on the document too. 
+	// This is the only event that can't be grabbed via delegation
 	
 	var form_binding_cache = $([]); // A cache for already-handled form elements
-	var delegate_submit = function(e){ $(document).triggerHandler('delegated_submit', e); } // The function that handles the delegation
+	var delegate_submit = function(e, data){ 
+	  data = $.extend(data||{}, {_replace_event: e});
+	  console.log('triggered!', e, data);
+	  return $(document).triggerHandler('delegated_submit', data); 
+	}
 
 	$(document).bind('DOMMaybeChanged', function(){
 		var forms = $('form');
