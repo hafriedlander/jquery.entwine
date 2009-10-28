@@ -25,7 +25,7 @@
 				e = originalevent || e;
 				
 				var el = e.target;
-				while (el && el != document && !e.isPropagationStopped()) {
+				while (el && el.nodeType == 1 && !e.isPropagationStopped()) {
 					var ret = one(el, arguments);
 					if (ret !== undefined) e.result = ret;
 					if (ret === false) { e.preventDefault(); e.stopPropagation(); }
@@ -44,7 +44,7 @@
 				var el = e.target;
 				var rel = e.relatedTarget;
 				
-				while (el && el != document && !e.isPropagationStopped()) {
+				while (el && el.nodeType == 1 && !e.isPropagationStopped()) {
 					/* We know el contained target. If it also contains relatedTarget then we didn't mouseenter / leave. What's more, every ancestor will also
 					contan el and rel, and so we can just stop bubbling */
 					if (is_or_contains(el, rel)) break;
@@ -92,7 +92,7 @@
 			
 				// And if we decided that a change happened, do the actual triggering
 				if (e.type == 'change') {
-					while (el && el != document && !e.isPropagationStopped()) {
+					while (el && el.nodeType == 1 && !e.isPropagationStopped()) {
 						var ret = one(el, arguments);
 						if (ret !== undefined) e.result = ret;
 						if (ret === false) { e.preventDefault(); e.stopPropagation(); }
