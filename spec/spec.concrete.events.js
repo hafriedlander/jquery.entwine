@@ -10,12 +10,12 @@ describe 'Concrete'
     end
    
     before_each
-  		$.concrete.synchronous_mode();
+      $.concrete.synchronous_mode();
       $.concrete.clear_all_rules()
       $('#dom_test').html('<div id="a" class="a b c"></div>')
     end
 	 	 
-	 it 'calls onfoo when foo triggered'
+    it 'calls onfoo when foo triggered'
       var a = 0;
       $('#a').concrete({onfoo: function(){a = 1;} });
       a.should.equal 0
