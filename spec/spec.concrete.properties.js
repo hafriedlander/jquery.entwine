@@ -27,7 +27,7 @@ describe 'Concrete'
       $('.a').setFoo(1);
       $('.a').getFoo().should.equal 1
     end
- 
+
     it 'can define a default value'
       $('#a').concrete({
         Foo: 1
@@ -73,5 +73,30 @@ describe 'Concrete'
       $('.a').concreteData('Foo').should.equal 4
       $('.a').concrete('test').concreteData('Foo').should.equal 8
     end
+    
+    describe 'jQuery style accessors'
+      it 'can define and get a basic property'
+        $('#a').concrete({
+          Foo: null
+        });
+        $('.a').Foo().should.be_null
+      end
+     
+      it 'can define and set a basic property'
+        $('#a').concrete({
+          Foo: null
+        });
+        $('.a').Foo(1);
+        $('.a').Foo().should.equal 1
+      end
+
+      it 'can define a default value'
+        $('#a').concrete({
+          Foo: 1
+        });
+        $('.a').Foo().should.equal 1
+      end
+    end
+
   end
 end

@@ -53,14 +53,22 @@
 		bind: function(selector, k, v) {
 			if (k.charAt(0) != k.charAt(0).toUpperCase()) $.concrete.warn('Concrete property '+k+' does not start with a capital letter', $.concrete.WARN_LEVEL_BESTPRACTISE);
 
-			var namespace = this;
-			g = function() { return this.concreteData(k) || v ; }
-			s = function(v){ return this.concreteData(k, v); }
+			// Create the getters and setters
 
-			g.pname = s.pname = k;
+			var getterName = 'get'+k;
+			var setterName = 'set'+k;
 
-			this.bind_proxy(selector, 'get'+k, g);
-			this.bind_proxy(selector, 'set'+k, s);
+			this.bind_proxy(selector, getterName, function() { return this.concreteData(k) || v ; });
+			this.bind_proxy(selector, setterName, function(v){ return this.concreteData(k, v); });
+			
+			// Get the get and set proxies we just created
+			
+			var getter = this.injectee[getterName];
+			var setter = this.injectee[setterName];
+			
+			// And bind in the jQuery-style accessor
+			
+			this.bind_proxy(selector, k, function(v){ return (arguments.length == 1 ? setter : getter).call(this, v) ; });
 
 			return true;
 		},
