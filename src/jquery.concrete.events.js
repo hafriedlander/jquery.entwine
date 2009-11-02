@@ -22,14 +22,10 @@
 			var one = this.one(name, 'func');
 			
 			var prxy = function(e, data) {
-
-        // special case for 'submit'
-        if ( data && data._replace_event ) {
-          // e.stopPropagation();
-          e = data._replace_event;
-          delete data._replace_event;
-        }
-          
+				// For events that do not bubble we manually trigger delegation (see delegate_submit below) 
+				// If this event is a manual trigger, the event we actually want to bubble is attached as a property of the passed event
+				e = e.delegatedEvent || e;
+				
 				var el = e.target;
 				while (el && el.nodeType == 1 && !e.isPropagationStopped()) {
 					var ret = one(el, arguments);
@@ -134,16 +130,16 @@
 						}
 						break;
 					case 'onsubmit':
-						event = 'delegated_submit';
+						event = 'delegatedSubmit';
+						break;
 					case 'onfocus':
 					case 'onblur':
 						$.concrete.warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
 				}
 				
-        // Build generic event handling proxy
-				if (!proxies[name]) 
-				  proxies[name] = this.build_event_proxy(name);
-				  
+				// If none of the special handlers created a proxy, use the generic proxy
+				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
+				
 				$(document).bind(event, proxies[name]);
 			}
 		}
@@ -167,9 +163,8 @@
 	
 	var form_binding_cache = $([]); // A cache for already-handled form elements
 	var delegate_submit = function(e, data){ 
-	  data = $.extend(data||{}, {_replace_event: e});
-	  console.log('triggered!', e, data);
-	  return $(document).triggerHandler('delegated_submit', data); 
+		var delegationEvent = $.Event('delegatedSubmit'); delegationEvent.delegatedEvent = e;
+		return $(document).trigger(delegationEvent, data); 
 	}
 
 	$(document).bind('DOMMaybeChanged', function(){
