@@ -24,6 +24,8 @@ var console;
 		clear_all_rules: function() { 
 			// Remove proxy functions
 			for (var k in $.fn) { if ($.fn[k].concrete) delete $.fn[k] ; }
+			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.concrete.events.js
+			$(document).unbind('.concrete');
 			// Remove namespaces, and start over again
 			namespaces = $.concrete.namespaces = {};
 		},

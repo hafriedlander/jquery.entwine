@@ -140,7 +140,7 @@
 				// If none of the special handlers created a proxy, use the generic proxy
 				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
 				
-				$(document).bind(event, proxies[name]);
+				$(document).bind(event+'.concrete', proxies[name]);
 			}
 		}
 	});
