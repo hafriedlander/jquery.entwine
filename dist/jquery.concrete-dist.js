@@ -758,6 +758,8 @@ var console;
 		clear_all_rules: function() { 
 			// Remove proxy functions
 			for (var k in $.fn) { if ($.fn[k].concrete) delete $.fn[k] ; }
+			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.concrete.events.js
+			$(document).unbind('.concrete');
 			// Remove namespaces, and start over again
 			namespaces = $.concrete.namespaces = {};
 		},
@@ -1280,7 +1282,7 @@ var console;
 				// If none of the special handlers created a proxy, use the generic proxy
 				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
 				
-				$(document).bind(event, proxies[name]);
+				$(document).bind(event+'.concrete', proxies[name]);
 			}
 		}
 	});
@@ -1390,7 +1392,7 @@ var console;
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
-				var matched = $([]), match, add, rem, res, rule, ctor, dtor;
+				var matched = $([]), add, rem, res, rule, ctor, dtor;
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
