@@ -10,7 +10,7 @@ describe 'Concrete'
     end
    
     before_each
-		$.concrete.synchronous_mode();
+  		$.concrete.synchronous_mode();
       $.concrete.clear_all_rules()
       $('#dom_test').html('<div id="a" class="a b c"></div>')
     end
@@ -63,6 +63,74 @@ describe 'Concrete'
       $('#a').trigger('foo')
       [a, b].should.eql [2, 1]
     end
-	 
+    
+    it 'passes event object'
+      var event;
+      $('#a').concrete({onfoo: function(e){event = e;} });
+      $('#a').trigger('foo');
+      event.should.have_prop 'type', 'foo'
+      $(event.target).should.have_attr 'id', 'a'
+    end
+    
+	  it 'delegates submit events to forms'
+      form = $('<form name="fuwd" class="food">').appendTo('body')
+      $('<input name="fish" value="fry">').appendTo('.food')
+      
+      $('.food').concrete({
+        onsubmit: function(e, d){ event = e; return false; },
+      });
+      // when
+      $('.food').trigger('submit');
+      // then
+      event.target.className.should.eql 'food'
+      
+      // $('form').remove()
+      
+	  end
+	  
+	  
+	  describe 'can pass event data'
+	  
+      it 'on custom events'
+        var data;
+        $('#a').concrete({onfoo: function(e, d){data = d;} });
+        $('#a').trigger('foo', {cheese: 'burger'});
+        data.cheese.should.eql 'burger'
+      end
+      
+	    it 'on normal events'
+        var data;
+        $('#a').concrete({onclick: function(e, d){data = d;} });
+        $('#a').trigger('click', {finger: 'left'});
+        data.finger.should.eql 'left'        
+	    end
+	    
+	    it 'on submit'
+        var data;
+        $('<form class="fuzz">').appendTo('body');
+        $('.fuzz').concrete({
+          onsubmit: function(e, d){ ee=e, dd=d; data = d; return false; },
+        })
+        
+        // if this is not here, the spec page will be re-submitted over
+        // and over in a loop
+        // 
+        // This only happens when there is another form submission spec
+        // on the page.  If you comment out the 'delegates submit events to forms'
+        // event above, then it works
+        // 
+        // This is some kind of bug
+        $('form').submit(function () { return false;})
+        
+        
+        // when
+        $('.fuzz').trigger('submit', {cheese: 'burger'});
+        // then
+        data.cheese.should.eql 'burger'        
+	    end
+	    
+	  end
+	  
+	  
   end
 end

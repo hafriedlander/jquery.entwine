@@ -296,6 +296,22 @@ Sometimes a block outside of a namespace will need to refer to that namespace re
   
 This equivalent to /with/ in javascript, and just like /with/, care should be taken to only use this construct in situations that merit it.
 
+h2. Hacking
+
+Specs are written using the awesome "JSpec":http://github.com/visionmedia/jspec library.  You can run them by opening the file: `spec/spec.html`.  
+
+When developing, this command will rerun specs whenever you edit a file:
+
+<pre><code>
+    jspec spec/spec.html -p src,spec
+</code></pre>
+
+This requires installing jspec binary, which you can do if you have ruby, with:
+
+<pre><code>
+    sudo gem install jspec
+</code></pre>
+
 h2. License
 
 Copyright (C) 2009 Hamish Friedlander (hamish@silverstripe.com) and SilverStripe Limited (www.silverstripe.com). All rights reserved.
