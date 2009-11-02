@@ -67,7 +67,7 @@
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
-				var matched = $([]), match, add, rem, res, rule, ctor, dtor;
+				var matched = $([]), add, rem, res, rule, ctor, dtor;
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
