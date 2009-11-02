@@ -71,24 +71,25 @@
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
-					// Build some quick-acccess variables
-				  rule = ctors[j];
+					// Build some quick-access variables
+					rule = ctors[j];
 					sel = rule.selector.selector;
 					ctor = rule.onmatch; 
 					dtor = rule.onunmatch;
+					
 					// Get the list of elements that match this selector, that haven't yet matched a more specific selector
 					res = add = $(sel).not(matched);
 					
-					// If this selector has a list of elements it matched against last time					
+					// If this selector has a list of elements it matched against last time
 					if (rule.cache) {
 						// Find the ones that are extra this time
 						add = res.not(rule.cache);
 						if (dtor) {
-  						// Find the ones that are gone this time
-  						rem = rule.cache.not(res);
-  						// And call the destructor on them
-  						if (rem.length) ctors.onunmatchproxy(rem, j, dtor);
-  					}
+							// Find the ones that are gone this time
+							rem = rule.cache.not(res);
+							// And call the destructor on them
+							if (rem.length) ctors.onunmatchproxy(rem, j, dtor);
+						}
 					}
 					
 					// Call the constructor on the newly matched ones
