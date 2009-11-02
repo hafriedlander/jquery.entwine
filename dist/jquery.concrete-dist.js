@@ -1161,8 +1161,10 @@ var console;
 		build_event_proxy: function(name) {
 			var one = this.one(name, 'func');
 			
-			var prxy = function(e, originalevent) {
-				e = originalevent || e;
+			var prxy = function(e, data) {
+				// For events that do not bubble we manually trigger delegation (see delegate_submit below) 
+				// If this event is a manual trigger, the event we actually want to bubble is attached as a property of the passed event
+				e = e.delegatedEvent || e;
 				
 				var el = e.target;
 				while (el && el.nodeType == 1 && !e.isPropagationStopped()) {
@@ -1268,13 +1270,16 @@ var console;
 						}
 						break;
 					case 'onsubmit':
-						event = 'delegated_submit';
+						event = 'delegatedSubmit';
+						break;
 					case 'onfocus':
 					case 'onblur':
 						$.concrete.warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
 				}
 				
+				// If none of the special handlers created a proxy, use the generic proxy
 				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
+				
 				$(document).bind(event, proxies[name]);
 			}
 		}
@@ -1293,10 +1298,14 @@ var console;
 		}
 	});
 	
-	// Find all forms and bind onsubmit to trigger on the document too. This is the only event that can't be grabbed via delegation.
+	// Find all forms and bind onsubmit to trigger on the document too. 
+	// This is the only event that can't be grabbed via delegation
 	
 	var form_binding_cache = $([]); // A cache for already-handled form elements
-	var delegate_submit = function(e){ $(document).triggerHandler('delegated_submit', e); } // The function that handles the delegation
+	var delegate_submit = function(e, data){ 
+		var delegationEvent = $.Event('delegatedSubmit'); delegationEvent.delegatedEvent = e;
+		return $(document).trigger(delegationEvent, data); 
+	}
 
 	$(document).bind('DOMMaybeChanged', function(){
 		var forms = $('form');
@@ -1381,23 +1390,29 @@ var console;
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
-				var matched = $([]), match, add, rem;
+				var matched = $([]), match, add, rem, res, rule, ctor, dtor;
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
-					// Build some quick-acccess variables
-					var sel = ctors[j].selector.selector, ctor = ctors[j].onmatch; dtor = ctors[j].onunmatch;
+					// Build some quick-access variables
+					rule = ctors[j];
+					sel = rule.selector.selector;
+					ctor = rule.onmatch; 
+					dtor = rule.onunmatch;
+					
 					// Get the list of elements that match this selector, that haven't yet matched a more specific selector
 					res = add = $(sel).not(matched);
 					
-					// If this selector has a list of elements it matched against last time					
-					if (ctors[j].cache) {
+					// If this selector has a list of elements it matched against last time
+					if (rule.cache) {
 						// Find the ones that are extra this time
-						add = res.not(ctors[j].cache);
-						// Find the ones that are gone this time
-						rem = ctors[j].cache.not(res);
-						// And call the desctructor on them
-						if (rem.length && dtor) ctors.onunmatchproxy(rem, j, dtor);
+						add = res.not(rule.cache);
+						if (dtor) {
+							// Find the ones that are gone this time
+							rem = rule.cache.not(res);
+							// And call the destructor on them
+							if (rem.length) ctors.onunmatchproxy(rem, j, dtor);
+						}
 					}
 					
 					// Call the constructor on the newly matched ones
