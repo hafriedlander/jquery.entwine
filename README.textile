@@ -12,6 +12,10 @@ h2. Getting Started
 * Watch the "Screencast":http://www.vimeo.com/6353390 (shot during a introductory developer meeting at SilverStripe)
 * Join the "Google Group":http://groups.google.com/group/jquery-concrete and let us know what you think, or what other features you'd like to see
 
+h2. Warning: Pending name change
+
+"Concrete5":http://www.concrete5.org/ has asserted their trademark, and requested I change the name of this project to avoid confusion with their CMS product. Since they asked nicely, a name change is pending. The current method names will be retained as aliases, so no code will break. What the new name will be is still under discussion - check the "Google Group Discussion":http://groups.google.com/group/jquery-concrete/browse_thread/thread/c62dd699f3fe2e83 for the latest.
+
 h2. Basic use
 
 h4. First intro
