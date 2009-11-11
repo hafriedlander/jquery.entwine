@@ -28,8 +28,10 @@
 						
 						var tmp_i = el.i, tmp_f = el.f;
 						el.i = i; el.f = one;
-						try { func.call(namespace.$(el)); }
-						catch(e) { el.i = tmp_i; el.f = tmp_f; }					
+						
+						try      { func.call(namespace.$(el)); }
+						catch(e) { $.concrete.warn_exception(name, e); } 
+						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
 				}
 				

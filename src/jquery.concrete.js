@@ -41,9 +41,21 @@ var console;
 		
 		/** Utility to optionally display warning messages depending on level */
 		warn: function(message, level) {
-			if (level <= $.concrete.warningLevel && console && console.log) { 
+			if (level <= $.concrete.warningLevel && console && console.warn) { 
 				console.warn(message);
 				if (console.trace) console.trace();
+			}
+		},
+		
+		warn_exception: function(where, e) {
+			if ($.concrete.WARN_LEVEL_IMPORTANT <= $.concrete.warningLevel && console && console.warn) {
+				var warning = 'Uncaught exception '+(e.name || '')+' in '+where+"\n";
+				
+				if (e.stack) warning += "Stack Trace:\n" + e.stack;
+				else if (e.fileName) warning += e.fileName + ':' + e.lineNumber 
+				else warning += e.toString();
+				
+				console.warn(warning);
 			}
 		}
 	});
