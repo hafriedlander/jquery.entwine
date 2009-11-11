@@ -1030,7 +1030,9 @@ var console;
 		 */
 		concrete: function(spacename) {
 			var i = 0;
-			var selector = this.selector ? $.selector(this.selector) : null;
+			/* Don't actually work out selector until we try and define something on it - we might be opening a namespace on an function-traveresed object
+			   which have non-standard selectors like .parents(.foo).slice(0,1) */
+			var selector = null;  
 		
 			/* By default we operator on the base namespace */
 			var namespace = namespaces.__base || $.concrete.Namespace();
@@ -1054,11 +1056,11 @@ var console;
 				
 				// If we have a concrete definition hash, inject it into namespace
 				if (res) {
+					if (selector === null) selector = this.selector ? $.selector(this.selector) : false;
+					
 					if (selector) namespace.add(selector, res);
 					else $.concrete.warn('Concrete block given to concrete call without selector. Make sure you call $(selector).concrete when defining blocks', $.concrete.WARN_LEVEL_IMPORTANT);
 				}
-				
-				
 			}
 		
 			/* Finally, return the jQuery object 'this' refers to, wrapped in the new namespace */
