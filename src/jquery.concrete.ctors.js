@@ -30,7 +30,7 @@
 						el.i = i; el.f = one;
 						
 						try      { func.call(namespace.$(el)); }
-						catch(e) { $.concrete.warn_exception(name, e); } 
+						catch(e) { $.concrete.warn_exception(name, el, e); } 
 						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
 				}

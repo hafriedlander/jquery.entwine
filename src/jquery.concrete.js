@@ -47,15 +47,14 @@ var console;
 			}
 		},
 		
-		warn_exception: function(where, e) {
+		warn_exception: function(where, /* optional: */ on, e) {
 			if ($.concrete.WARN_LEVEL_IMPORTANT <= $.concrete.warningLevel && console && console.warn) {
-				var warning = 'Uncaught exception '+(e.name || '')+' in '+where+"\n";
+				if (arguments.length == 2) { e = on; on = null; }
 				
-				if (e.stack) warning += "Stack Trace:\n" + e.stack;
-				else if (e.fileName) warning += e.fileName + ':' + e.lineNumber 
-				else warning += e.toString();
+				if (on) console.warn('Uncaught exception',e,'in',where,'on',on);
+				else    console.warn('Uncaught exception',e,'in',where);
 				
-				console.warn(warning);
+				if (e.stack) console.warn("Stack Trace:\n" + e.stack);
 			}
 		}
 	});
