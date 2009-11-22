@@ -189,8 +189,9 @@ var console;
 		 * Used by proxy for all calls, and by ctorProxy to handle _super calls
 		 * @param {String} name - name of the function as passed in the construction object
 		 * @param {String} funcprop - the property on the Rule object that gives the actual function to call
+		 * @param {function} basefunc - the non-concrete function to use as the catch-all function at the bottom of the stack
 		 */
-		one: function(name, funcprop) {
+		one: function(name, funcprop, basefunc) {
 			var namespace = this;
 			var funcs = this.store[name];
 			
@@ -205,6 +206,8 @@ var console;
 						return ret;
 					}
 				}
+				// If we didn't find a concrete-defined function, but there is a non-concrete function to use as a base, try that
+				if (basefunc) return basefunc.apply(namespace.$(el), args);
 			}
 			
 			return one;
@@ -214,9 +217,10 @@ var console;
 		 * A proxy is a function attached to a callable object (either the base jQuery.fn or a subspace object) which handles
 		 * finding and calling the correct function for each member of the current jQuery context
 		 * @param {String} name - name of the function as passed in the construction object
+		 * @param {function} basefunc - the non-concrete function to use as the catch-all function at the bottom of the stack
 		 */
-		build_proxy: function(name) {
-			var one = this.one(name, 'func');
+		build_proxy: function(name, basefunc) {
+			var one = this.one(name, 'func', basefunc);
 			
 			var prxy = function() {
 				var rv, ctx = $(this); 
@@ -234,8 +238,8 @@ var console;
 			
 			var rule = rulelist.addRule(selector, name); rule.func = func;
 			
-			if (!this.injectee.hasOwnProperty(name)) {
-				this.injectee[name] = this.build_proxy(name);
+			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].concrete) {
+				this.injectee[name] = this.build_proxy(name, this.injectee.hasOwnProperty(name) ? this.injectee[name] : null);
 				this.injectee[name].concrete = true;
 			}
 
