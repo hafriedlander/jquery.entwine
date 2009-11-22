@@ -51,11 +51,16 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	
 	/**** ATTRIBUTE ACCESSORS ****/
 	
+	// Not all attribute names can be used as identifiers, so we encode any non-acceptable characters as hex
+	var varForAttr = function(attr) {
+		return '_' + attr.replace(/^[^A-Za-z]|[^A-Za-z0-9]/g, function(m){ return '_0x' + m.charCodeAt(0).toString(16) + '_'; });
+	}
+	
 	var getAttr;
 	
 	// Good browsers
 	if (!getAttributeDodgy) {
-		getAttr = function(attr){ return 'var _'+attr+' = el.getAttribute("'+attr+'");' ; }
+		getAttr = function(attr){ return 'var '+varForAttr(attr)+' = el.getAttribute("'+attr+'");' ; }
 	}
 	// IE 6, 7
 	else {
@@ -64,20 +69,20 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		
 		getAttr = function(attr) {
 			var ieattr = getAttrIEMap[attr] || attr;
-			return 'var _'+attr+' = el.getAttribute("'+ieattr+'",2) || (el.getAttributeNode("'+attr+'")||{}).nodeValue;';
+			return 'var '+varForAttr(attr)+' = el.getAttribute("'+ieattr+'",2) || (el.getAttributeNode("'+attr+'")||{}).nodeValue;';
 		}
 	}
 	
 	/**** ATTRIBUTE COMPARITORS ****/
 	
 	var attrchecks = {
-		'-':  '!_K',
-		'=':  '_K != "V"',
-		'!=': '_K == "V"',
-		'~=': '__K.indexOf(" V ") == -1',
-		'^=': '!_K || _K.indexOf("V") != 0',
-		'*=': '!_K || _K.indexOf("V") == -1',
-		'$=': '!_K || _K.substr(_K.length-"V".length) != "V"'
+		'-':  '!K',
+		'=':  'K != "V"',
+		'!=': 'K == "V"',
+		'~=': '_WS_K.indexOf(" V ") == -1',
+		'^=': '!K || K.indexOf("V") != 0',
+		'*=': '!K || K.indexOf("V") == -1',
+		'$=': '!K || K.substr(K.length-"V".length) != "V"'
 	}
 
 	/**** STATE TRACKER ****/
@@ -130,7 +135,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		uses_wsattr: function(attr) {
 			if (this.wsattrs[attr]) return;
 			this.wsattrs[attr] = true;
-			return join([this.uses_attr(attr), 'var __'+attr+' = " "+_'+attr+'+" ";']); 
+			return join([this.uses_attr(attr), 'var _WS_'+varForAttr(attr)+' = " "+'+varForAttr(attr)+'+" ";']); 
 		},
 		
 		save: function(lbl) {
@@ -207,7 +212,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			
 			/* Check against class names */
 			$.each(this.classes, function(i, cls){
-				js[js.length] = 'if (__class.indexOf(" '+cls+' ") == -1) BAD;';
+				js[js.length] = 'if (_WS__class.indexOf(" '+cls+' ") == -1) BAD;';
 			})
 		}
 		
@@ -215,7 +220,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		$.each(this.attrs, function(i, attr){
 			js[js.length] = (attr[1] == '~=') ? el.uses_wsattr(attr[0]) : el.uses_attr(attr[0]);
 			var check = attrchecks[ attr[1] || '-' ];
-			check = check.replace( /K/g, attr[0]).replace( /V/g, attr[2] && attr[2].match(STARTS_WITH_QUOTES) ? attr[2].slice(1,-1) : attr[2] );
+			check = check.replace( /K/g, varForAttr(attr[0])).replace( /V/g, attr[2] && attr[2].match(STARTS_WITH_QUOTES) ? attr[2].slice(1,-1) : attr[2] );
 			js[js.length] = 'if ('+check+') BAD;';
 		});
 		

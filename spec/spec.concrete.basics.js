@@ -11,11 +11,18 @@ describe 'Concrete'
   
     before_each
       $.concrete.clear_all_rules();
-      $('#dom_test').html('<div id="a" class="a b c"></div><div id="b" class="c d e"></div>');
+      $('#dom_test').html('<div id="a" class="a b c" data-fieldtype="foo"></div><div id="b" class="c d e"></div>');
     end
 
     it 'can attach and call a base function'
       $('#a').concrete({
+        foo: function(){return this.attr('id');}
+      });
+      $('.a').foo().should.equal 'a'
+    end
+    
+    it 'can attach and call a base function on a selector using a data attribute selection'
+      $('[data-fieldtype=foo]').concrete({
         foo: function(){return this.attr('id');}
       });
       $('.a').foo().should.equal 'a'
