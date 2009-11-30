@@ -3,8 +3,8 @@
 		<!-- We start by adding in the required javascript libraries - first, jQuery -->
 		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
 		
-		<!-- Then jQuery.concrete (we're using the distribution build here) -->
-		<script type='text/javascript' src='../js/jquery.concrete-dist.js'></script>
+		<!-- Then jQuery.entwine (we're using the distribution build here) -->
+		<script type='text/javascript' src='../js/jquery.entwine-dist.js'></script>
 		
 		<!-- Some simple styling -->
 		<style type='text/css'>
@@ -21,9 +21,9 @@
 			}
 		</style>
 		
-		<!-- Then we add a couple of concrete functions. At this stage they're very simple - just calls to jQuery#animate -->
+		<!-- Then we add a couple of entwine functions. At this stage they're very simple - just calls to jQuery#animate -->
 		<script type='text/javascript'>
-			$('ul li').concrete({
+			$('ul li').entwine({
 				expand: function() {
 					this.animate({height: 100}, {queue: false})
 				},
@@ -34,12 +34,12 @@
 		</script>
 	</head>
 	<body>
-		<h1>Concrete: Basics <a href='step_02.html'>Next >></a></h1>
+		<h1>Entwine: Basics <a href='step_02.html'>Next >></a></h1>
 		<!-- 
 		And here are the buttons that let a user call the expand and collapse function. 
-		As you can see, concrete functions look like any other jQuery object function. The big difference is that a concrete function knows
+		As you can see, entwine functions look like any other jQuery object function. The big difference is that a entwine function knows
 		what sort of elements it should act on. If you change the functions to $("*").expand() and $("*").collapse(), it will still work exactly
-		the same, because the functions will only actually be called on elements matching the "ul li" selector defined in the concrete block.
+		the same, because the functions will only actually be called on elements matching the "ul li" selector defined in the entwine block.
 		-->
 		<p class='buttons'>
 			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />

@@ -3,7 +3,7 @@
 		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
 		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
 		
-		<script type='text/javascript' src='../js/jquery.concrete-dist.js'></script>
+		<script type='text/javascript' src='../js/jquery.entwine-dist.js'></script>
 		
 		<style type='text/css'>
 			body {
@@ -33,7 +33,7 @@
 		</style>
 		
 		<script type='text/javascript'>
-			$('ul li').concrete({
+			$('ul li').entwine({
 				onmatch: function(){
 					this.css({height: 45, width: 200, clear: 'left'});
 				},
@@ -50,7 +50,7 @@
 					this.collapse();
 				}
 			})
-			$('ul.horizontal li').concrete({
+			$('ul.horizontal li').entwine({
 				onmatch: function(){
 					this.css({height: 100, width: 45, clear: 'none'});
 				},
@@ -61,7 +61,7 @@
 					this.animate({width: 45}, {queue: false})
 				}
 			})
-			$('ul.lightens li').concrete({
+			$('ul.lightens li').entwine({
 				Highlight: '#ced',
 				
 				onmouseenter: function(){
@@ -76,9 +76,9 @@
 		</script>
 	</head>
 	<body>
-		<h1>jQuery.concrete introductory tutorial <a style='font-size:14px;color:#644' href='step_01.html'>Next >></a></h1>
+		<h1>jQuery.entwine introductory tutorial <a style='font-size:14px;color:#644' href='step_01.html'>Next >></a></h1>
 		<p>
-			Welcome to the jQuery.concrete introductory tutorial. We're going to work through several iterations of a piece of jQuery.concrete code to
+			Welcome to the jQuery.entwine introductory tutorial. We're going to work through several iterations of a piece of jQuery.entwine code to
 			get the animating accordion menu below. Although this accordion could easily be achieved using regular jQuery, the API to this accordion
 			is much nicer than a standard jQuery plugin. The code (in it's entirety) attached to each of the buttons on the right is:
 		</p>	

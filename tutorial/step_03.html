@@ -4,7 +4,7 @@
 		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
 		<script type='text/javascript' src='../js/jquery/jquery-ui-1.7.2.custom.min.js'></script>
 		
-		<script type='text/javascript' src='../js/jquery.concrete-dist.js'></script>
+		<script type='text/javascript' src='../js/jquery.entwine-dist.js'></script>
 		
 		<!-- No change here -->
 		<style type='text/css'>
@@ -20,20 +20,20 @@
 		</style>
 		
 		<!--
-		Now this is interesting. We're defining two concrete blocks, and the second has a _more specific_ selector than the first. In jQuery.concrete
+		Now this is interesting. We're defining two entwine blocks, and the second has a _more specific_ selector than the first. In jQuery.entwine
 		for each element, where there is more than one function definition by a given name, then function in the _most specific_ selector block is called.
 		
 		In this case, it means that if the ul has the class 'lightens', mouseenter and mouseleave events on the li elements will cause a color animation instead
 		of a height animation.
 		
-		Removing the 'lightens' class means the second concrete block no longer matches, and so mouseenter and mouseleave events will start causing a height animation
+		Removing the 'lightens' class means the second entwine block no longer matches, and so mouseenter and mouseleave events will start causing a height animation
 		again.
 		
 		This calculation of the most specific function occurs on every call, so there is no delay, recalc(), rebind() or any other step neccesary between mutating the
 		DOM (changing a class, adding an element, etc), and having the right functions get called.
 		-->
 		<script type='text/javascript'>
-			$('ul li').concrete({
+			$('ul li').entwine({
 				expand: function() {
 					this.animate({height: 100}, {queue: false})
 				},
@@ -47,7 +47,7 @@
 					this.collapse();
 				}
 			})
-			$('ul.lightens li').concrete({
+			$('ul.lightens li').entwine({
 				onmouseenter: function(){
 					this.animate({backgroundColor: '#ced'}, {queue: false});
 				},
@@ -58,7 +58,7 @@
 		</script>
 	</head>
 	<body>
-		<h1>Concrete: Overriding events <a href='step_04.html'>Next >></a></h1>
+		<h1>Entwine: Overriding events <a href='step_04.html'>Next >></a></h1>
 		<p class='buttons'>
 			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
 			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />

@@ -3,7 +3,7 @@
 		<!-- We still have the same script includes -->
 		<script type='text/javascript' src='../js/jquery/jquery-1.3.2.js'></script>
 		
-		<script type='text/javascript' src='../js/jquery.concrete-dist.js'></script>
+		<script type='text/javascript' src='../js/jquery.entwine-dist.js'></script>
 		
 		<!-- And the same style -->
 		<style type='text/css'>
@@ -19,13 +19,13 @@
 		</style>
 		
 		<!-- 
-		Here's the main change - we've added event handlers for mouseenter and mouseleave. In jQuery.concrete, anything starting with on is
-		an event handler. jQuery.concrete handles all standard events in an orthagonal manner.
+		Here's the main change - we've added event handlers for mouseenter and mouseleave. In jQuery.entwine, anything starting with on is
+		an event handler. jQuery.entwine handles all standard events in an orthagonal manner.
 		
 		In this case, the event handlers call the expand or collapse method on the same element the event's handled by
 		-->
 		<script type='text/javascript'>
-			$('ul li').concrete({
+			$('ul li').entwine({
 				expand: function() {
 					this.animate({height: 100}, {queue: false})
 				},
@@ -43,7 +43,7 @@
 	</head>
 	<body>
 		<!-- No change here -->
-		<h1>Concrete: Events <a href='step_03.html'>Next >></a></h1>
+		<h1>Entwine: Events <a href='step_03.html'>Next >></a></h1>
 		<p class='buttons'>
 			<input type='button' onclick='javascript:$("ul li").expand();' value='Expand all' /><br />
 			<input type='button' onclick='javascript:$("ul li").collapse();' value='Collapse all' />
