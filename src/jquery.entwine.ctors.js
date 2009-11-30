@@ -1,9 +1,9 @@
 (function($) {	
 
 	/* Add the methods to handle constructor & destructor binding to the Namespace class */
-	$.concrete.Namespace.addMethods({
+	$.entwine.Namespace.addMethods({
 		bind_condesc: function(selector, name, func) {
-			var ctors = this.store.ctors || (this.store.ctors = $.concrete.RuleList()) ;
+			var ctors = this.store.ctors || (this.store.ctors = $.entwine.RuleList()) ;
 			
 			var rule;
 			for (var i = 0 ; i < ctors.length; i++) {
@@ -30,7 +30,7 @@
 						el.i = i; el.f = one;
 						
 						try      { func.call(namespace.$(el)); }
-						catch(e) { $.concrete.warn_exception(name, el, e); } 
+						catch(e) { $.entwine.warn_exception(name, el, e); } 
 						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
 				}
@@ -40,7 +40,7 @@
 		}
 	});
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 30,
 		
 		bind: function(selector, k, v) {
@@ -63,9 +63,9 @@
 	 */
 	$(document).bind('DOMMaybeChanged', function(){
 		// For every namespace
-		for (var k in $.concrete.namespaces) {
+		for (var k in $.entwine.namespaces) {
 			// That has constructors or destructors
-			var ctors = $.concrete.namespaces[k].store.ctors;
+			var ctors = $.entwine.namespaces[k].store.ctors;
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already

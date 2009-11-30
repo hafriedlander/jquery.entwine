@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # Specify the output file's name
-FILE="dist/jquery.concrete-dist.js"
+FILE="dist/jquery.entwine-dist.js"
 
 mkdir -p dist
 rm dist/*.js
 
-echo "/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version $VER. */" > $FILE
+echo "/* jQuery.Entwine - Copyright 2009 Hamish Friedlander and SilverStripe. Version $VER. */" > $FILE
 
 for x in \
 	vendor/jquery.selector/jquery.class.js \
@@ -14,11 +14,12 @@ for x in \
 	vendor/jquery.selector/jquery.selector.specifity.js \
 	vendor/jquery.selector/jquery.selector.matches.js \
 	src/jquery.focusinout.js \
-	src/jquery.concrete.js \
-	src/jquery.concrete.dommaybechanged.js \
-	src/jquery.concrete.events.js \
-	src/jquery.concrete.ctors.js \
-	src/jquery.concrete.properties.js
+	src/jquery.entwine.js \
+	src/jquery.entwine.dommaybechanged.js \
+	src/jquery.entwine.events.js \
+	src/jquery.entwine.ctors.js \
+	src/jquery.entwine.properties.js \
+	src/jquery.entwine.legacy.js
 do \
   echo >> $FILE
   echo "/* $x */" >> $FILE

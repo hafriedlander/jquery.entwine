@@ -1,4 +1,4 @@
-/* jQuery.Concrete - Copyright 2009 Hamish Friedlander and SilverStripe. Version . */
+/* jQuery.Entwine - Copyright 2009 Hamish Friedlander and SilverStripe. Version . */
 
 /* vendor/jquery.selector/jquery.class.js */
 
@@ -735,7 +735,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 })(jQuery);;
 
 
-/* src/jquery.concrete.js */
+/* src/jquery.entwine.js */
 
 var console;
 
@@ -743,30 +743,30 @@ var console;
 	
 	var namespaces = {};
 
-	$.concrete = function() {
-		$.fn.concrete.apply(null, arguments);
+	$.entwine = function() {
+		$.fn.entwine.apply(null, arguments);
 	}
 	
 	/**
 	 * A couple of utility functions for accessing the store outside of this closure, and for making things
 	 * operate in a little more easy-to-test manner
 	 */
-	$.extend($.concrete, {
+	$.extend($.entwine, {
 		/**
 		 * Get all the namespaces. Useful for introspection? Internal interface of Namespace not guaranteed consistant
 		 */
 		namespaces: namespaces,
 		
 		/**
-		 * Remove all concrete rules
+		 * Remove all entwine rules
 		 */
 		clear_all_rules: function() { 
 			// Remove proxy functions
-			for (var k in $.fn) { if ($.fn[k].concrete) delete $.fn[k] ; }
-			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.concrete.events.js
-			$(document).unbind('.concrete');
+			for (var k in $.fn) { if ($.fn[k].entwine) delete $.fn[k] ; }
+			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
+			$(document).unbind('.entwine');
 			// Remove namespaces, and start over again
-			namespaces = $.concrete.namespaces = {};
+			namespaces = $.entwine.namespaces = {};
 		},
 		
 		WARN_LEVEL_NONE: 0,
@@ -780,14 +780,14 @@ var console;
 		
 		/** Utility to optionally display warning messages depending on level */
 		warn: function(message, level) {
-			if (level <= $.concrete.warningLevel && console && console.warn) { 
+			if (level <= $.entwine.warningLevel && console && console.warn) { 
 				console.warn(message);
 				if (console.trace) console.trace();
 			}
 		},
 		
 		warn_exception: function(where, /* optional: */ on, e) {
-			if ($.concrete.WARN_LEVEL_IMPORTANT <= $.concrete.warningLevel && console && console.warn) {
+			if ($.entwine.WARN_LEVEL_IMPORTANT <= $.entwine.warningLevel && console && console.warn) {
 				if (arguments.length == 2) { e = on; on = null; }
 				
 				if (on) console.warn('Uncaught exception',e,'in',where,'on',on);
@@ -822,7 +822,7 @@ var console;
 		       (a.rulecount - b.rulecount) ;
 	}
 
-	$.concrete.RuleList = function() {
+	$.entwine.RuleList = function() {
 		var list = [];
 		
 		list.addRule = function(selector, name){ 
@@ -840,11 +840,11 @@ var console;
 	var handlers = [];
 	
 	/**
-	 * A Namespace holds all the information needed for adding concrete methods to a namespace (including the _null_ namespace)
+	 * A Namespace holds all the information needed for adding entwine methods to a namespace (including the _null_ namespace)
 	 */
-	$.concrete.Namespace = Base.extend({
+	$.entwine.Namespace = Base.extend({
 		init: function(name){
-			if (name && !name.match(/^[A-Za-z0-9.]+$/)) $.concrete.warn('Concrete namespace '+name+' is not formatted as period seperated identifiers', $.concrete.WARN_LEVEL_BESTPRACTISE);
+			if (name && !name.match(/^[A-Za-z0-9.]+$/)) $.entwine.warn('Entwine namespace '+name+' is not formatted as period seperated identifiers', $.entwine.WARN_LEVEL_BESTPRACTISE);
 			name = name || '__base';
 			
 			this.name = name;
@@ -891,18 +891,18 @@ var console;
 				// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
 				$.extend(this.$, $);
 				
-				// We override concrete to inject the name of this namespace when defining blocks inside this namespace
-				var concrete_wrapper = this.injectee.concrete = function(spacename) {
+				// We override entwine to inject the name of this namespace when defining blocks inside this namespace
+				var entwine_wrapper = this.injectee.entwine = function(spacename) {
 					var args = arguments;
 					
 					if (!spacename || typeof spacename != 'string') { args = $.makeArray(args); args.unshift(name); }
 					else if (spacename.charAt(0) != '.') args[0] = name+'.'+spacename;
 					
-					return $.fn.concrete.apply(this, args);
+					return $.fn.entwine.apply(this, args);
 				}
 				
-				this.$.concrete = function() {
-					concrete_wrapper.apply(null, arguments);
+				this.$.entwine = function() {
+					entwine_wrapper.apply(null, arguments);
 				}
 				
 				for (var i = 0; i < handlers.length; i++) {
@@ -914,10 +914,10 @@ var console;
 						for (var k in overrides) this.injectee[k] = overrides[k];
 					}
 					
-					// Inject $.concrete function overrides
+					// Inject $.entwine function overrides
 					if (builder = handler.namespaceStaticOverrides) {
 						var overrides = builder(this);
-						for (var k in overrides) this.$.concrete[k] = overrides[k];
+						for (var k in overrides) this.$.entwine[k] = overrides[k];
 					}
 				}
 			}
@@ -928,7 +928,7 @@ var console;
 		 * Used by proxy for all calls, and by ctorProxy to handle _super calls
 		 * @param {String} name - name of the function as passed in the construction object
 		 * @param {String} funcprop - the property on the Rule object that gives the actual function to call
-		 * @param {function} basefunc - the non-concrete function to use as the catch-all function at the bottom of the stack
+		 * @param {function} basefunc - the non-entwine function to use as the catch-all function at the bottom of the stack
 		 */
 		one: function(name, funcprop, basefunc) {
 			var namespace = this;
@@ -945,7 +945,7 @@ var console;
 						return ret;
 					}
 				}
-				// If we didn't find a concrete-defined function, but there is a non-concrete function to use as a base, try that
+				// If we didn't find a entwine-defined function, but there is a non-entwine function to use as a base, try that
 				if (basefunc) return basefunc.apply(namespace.$(el), args);
 			}
 			
@@ -956,7 +956,7 @@ var console;
 		 * A proxy is a function attached to a callable object (either the base jQuery.fn or a subspace object) which handles
 		 * finding and calling the correct function for each member of the current jQuery context
 		 * @param {String} name - name of the function as passed in the construction object
-		 * @param {function} basefunc - the non-concrete function to use as the catch-all function at the bottom of the stack
+		 * @param {function} basefunc - the non-entwine function to use as the catch-all function at the bottom of the stack
 		 */
 		build_proxy: function(name, basefunc) {
 			var one = this.one(name, 'func', basefunc);
@@ -973,17 +973,17 @@ var console;
 		},
 		
 		bind_proxy: function(selector, name, func) {
-			var rulelist = this.store[name] || (this.store[name] = $.concrete.RuleList());
+			var rulelist = this.store[name] || (this.store[name] = $.entwine.RuleList());
 			
 			var rule = rulelist.addRule(selector, name); rule.func = func;
 			
-			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].concrete) {
+			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].entwine) {
 				this.injectee[name] = this.build_proxy(name, this.injectee.hasOwnProperty(name) ? this.injectee[name] : null);
-				this.injectee[name].concrete = true;
+				this.injectee[name].entwine = true;
 			}
 
-			if (!this.injectee[name].concrete) {
-				$.concrete.warn('Warning: Concrete function '+name+' clashes with regular jQuery function - concrete function will not be callable directly on jQuery object', $.concrete.WARN_LEVEL_IMPORTANT);
+			if (!this.injectee[name].entwine) {
+				$.entwine.warn('Warning: Entwine function '+name+' clashes with regular jQuery function - entwine function will not be callable directly on jQuery object', $.entwine.WARN_LEVEL_IMPORTANT);
 			}
 		},
 		
@@ -1015,12 +1015,12 @@ var console;
 	 * A handler is some javascript code that adds support for some time of key / value pair passed in the hash to the Namespace add method.
 	 * The default handlers provided (and included by default) are event, ctor and properties
 	 */
-	$.concrete.Namespace.addHandler = function(handler) {
+	$.entwine.Namespace.addHandler = function(handler) {
 		for (var i = 0; i < handlers.length && handlers[i].order < handler.order; i++) { /* Pass */ }
 		handlers.splice(i, 0, handler);
 	}
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 50,
 		
 		bind: function(selector, k, v){
@@ -1033,22 +1033,22 @@ var console;
 
 	$.extend($.fn, {
 		/**
-		 * Main concrete function. Used for new definitions, calling into a namespace (or forcing the base namespace) and entering a using block
+		 * Main entwine function. Used for new definitions, calling into a namespace (or forcing the base namespace) and entering a using block
 		 * 
 		 */
-		concrete: function(spacename) {
+		entwine: function(spacename) {
 			var i = 0;
 			/* Don't actually work out selector until we try and define something on it - we might be opening a namespace on an function-traveresed object
 			   which have non-standard selectors like .parents(.foo).slice(0,1) */
 			var selector = null;  
 		
 			/* By default we operator on the base namespace */
-			var namespace = namespaces.__base || $.concrete.Namespace();
+			var namespace = namespaces.__base || $.entwine.Namespace();
 			
 			/* If the first argument is a string, then it's the name of a namespace. Look it up */
 			if (typeof spacename == 'string') {
 				if (spacename.charAt('0') == '.') spacename = spacename.substr(1);
-				if (spacename) namespace = namespaces[spacename] || $.concrete.Namespace(spacename);
+				if (spacename) namespace = namespaces[spacename] || $.entwine.Namespace(spacename);
 				i=1;
 			}
 		
@@ -1056,18 +1056,18 @@ var console;
 			while (i < arguments.length) {
 				var res = arguments[i++];
 				
-				// If it's a function, call it - either it's a using block or it's a namespaced concrete definition
+				// If it's a function, call it - either it's a using block or it's a namespaced entwine definition
 				if ($.isFunction(res)) {
-					if (res.length != 1) $.concrete.warn('Function block inside concrete definition does not take $ argument properly', $.concrete.WARN_LEVEL_IMPORTANT);
+					if (res.length != 1) $.entwine.warn('Function block inside entwine definition does not take $ argument properly', $.entwine.WARN_LEVEL_IMPORTANT);
 					res = res.call(namespace.$(this), namespace.$);
 				}
 				
-				// If we have a concrete definition hash, inject it into namespace
+				// If we have a entwine definition hash, inject it into namespace
 				if (res) {
 					if (selector === null) selector = this.selector ? $.selector(this.selector) : false;
 					
 					if (selector) namespace.add(selector, res);
-					else $.concrete.warn('Concrete block given to concrete call without selector. Make sure you call $(selector).concrete when defining blocks', $.concrete.WARN_LEVEL_IMPORTANT);
+					else $.entwine.warn('Entwine block given to entwine call without selector. Make sure you call $(selector).entwine when defining blocks', $.entwine.WARN_LEVEL_IMPORTANT);
 				}
 			}
 		
@@ -1076,7 +1076,7 @@ var console;
 		},
 		
 		/** 
-		 * Calls the next most specific version of the current concrete method
+		 * Calls the next most specific version of the current entwine method
 		 */
 		_super: function(){
 			var rv, i = this.length;
@@ -1092,7 +1092,7 @@ var console;
 ;
 
 
-/* src/jquery.concrete.dommaybechanged.js */
+/* src/jquery.entwine.dommaybechanged.js */
 
 (function($){
 	
@@ -1108,7 +1108,7 @@ var console;
 		check_id = null;
 	}
 	
-	$.extend($.concrete, {
+	$.extend($.entwine, {
 		/**
 		 * Make onmatch and onunmatch work in synchronous mode - that is, new elements will be detected immediately after
 		 * the DOM manipulation that made them match. This is only really useful for during testing, since it's pretty slow
@@ -1160,7 +1160,7 @@ var console;
 })(jQuery);;
 
 
-/* src/jquery.concrete.events.js */
+/* src/jquery.entwine.events.js */
 
 (function($) {	
 
@@ -1181,7 +1181,7 @@ var console;
 	}
 
 	/* Add the methods to handle event binding to the Namespace class */
-	$.concrete.Namespace.addMethods({
+	$.entwine.Namespace.addMethods({
 		build_event_proxy: function(name) {
 			var one = this.one(name, 'func');
 			
@@ -1272,7 +1272,7 @@ var console;
 		},
 		
 		bind_event: function(selector, name, func, event) {
-			var funcs = this.store[name] || (this.store[name] = $.concrete.RuleList()) ;
+			var funcs = this.store[name] || (this.store[name] = $.entwine.RuleList()) ;
 			var proxies = funcs.proxies || (funcs.proxies = {});
 			
 			var rule = funcs.addRule(selector, name); rule.func = func;
@@ -1298,18 +1298,18 @@ var console;
 						break;
 					case 'onfocus':
 					case 'onblur':
-						$.concrete.warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
+						$.entwine.warn('Event '+event+' not supported - using focusin / focusout instead', $.entwine.WARN_LEVEL_IMPORTANT);
 				}
 				
 				// If none of the special handlers created a proxy, use the generic proxy
 				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
 				
-				$(document).bind(event+'.concrete', proxies[name]);
+				$(document).bind(event+'.entwine', proxies[name]);
 			}
 		}
 	});
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 40,
 		
 		bind: function(selector, k, v){
@@ -1343,14 +1343,14 @@ var console;
 	;
 
 
-/* src/jquery.concrete.ctors.js */
+/* src/jquery.entwine.ctors.js */
 
 (function($) {	
 
 	/* Add the methods to handle constructor & destructor binding to the Namespace class */
-	$.concrete.Namespace.addMethods({
+	$.entwine.Namespace.addMethods({
 		bind_condesc: function(selector, name, func) {
-			var ctors = this.store.ctors || (this.store.ctors = $.concrete.RuleList()) ;
+			var ctors = this.store.ctors || (this.store.ctors = $.entwine.RuleList()) ;
 			
 			var rule;
 			for (var i = 0 ; i < ctors.length; i++) {
@@ -1377,7 +1377,7 @@ var console;
 						el.i = i; el.f = one;
 						
 						try      { func.call(namespace.$(el)); }
-						catch(e) { $.concrete.warn_exception(name, el, e); } 
+						catch(e) { $.entwine.warn_exception(name, el, e); } 
 						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
 				}
@@ -1387,7 +1387,7 @@ var console;
 		}
 	});
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 30,
 		
 		bind: function(selector, k, v) {
@@ -1410,9 +1410,9 @@ var console;
 	 */
 	$(document).bind('DOMMaybeChanged', function(){
 		// For every namespace
-		for (var k in $.concrete.namespaces) {
+		for (var k in $.entwine.namespaces) {
 			// That has constructors or destructors
-			var ctors = $.concrete.namespaces[k].store.ctors;
+			var ctors = $.entwine.namespaces[k].store.ctors;
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
@@ -1458,25 +1458,25 @@ var console;
 ;
 
 
-/* src/jquery.concrete.properties.js */
+/* src/jquery.entwine.properties.js */
 
 (function($) {	
 
-	var concrete_prepend = '__concrete!';
+	var entwine_prepend = '__entwine!';
 	
-	var getConcreteData = function(el, namespace, property) {
-		return el.data(concrete_prepend + namespace + '!' + property);
+	var getEntwineData = function(el, namespace, property) {
+		return el.data(entwine_prepend + namespace + '!' + property);
 	}
 	
-	var setConcreteData = function(el, namespace, property, value) {
-		return el.data(concrete_prepend + namespace + '!' + property, value);
+	var setEntwineData = function(el, namespace, property, value) {
+		return el.data(entwine_prepend + namespace + '!' + property, value);
 	}
 	
-	var getConcreteDataAsHash = function(el, namespace) {
+	var getEntwineDataAsHash = function(el, namespace) {
 		var hash = {};
 		var id = jQuery.data(el[0]);
 		
-		var matchstr = concrete_prepend + namespace + '!';
+		var matchstr = entwine_prepend + namespace + '!';
 		var matchlen = matchstr.length;
 		
 		var cache = jQuery.cache[id];
@@ -1487,41 +1487,41 @@ var console;
 		return hash;
 	}
 	
-	var setConcreteDataFromHash = function(el, namespace, hash) {
-		for (var k in hash) setConcreteData(namespace, k, hash[k]);
+	var setEntwineDataFromHash = function(el, namespace, hash) {
+		for (var k in hash) setEntwineData(namespace, k, hash[k]);
 	}
 
-	var concreteData = function(el, namespace, args) {
+	var entwineData = function(el, namespace, args) {
 		switch (args.length) {
 			case 0:
-				return getConcreteDataAsHash(el, namespace);
+				return getEntwineDataAsHash(el, namespace);
 			case 1:
-				if (typeof args[0] == 'string') return getConcreteData(el, namespace, args[0]);
-				else                            return setConcreteDataFromHash(el, namespace, args[0]);
+				if (typeof args[0] == 'string') return getEntwineData(el, namespace, args[0]);
+				else                            return setEntwineDataFromHash(el, namespace, args[0]);
 			default:
-				return setConcreteData(el, namespace, args[0], args[1]);
+				return setEntwineData(el, namespace, args[0], args[1]);
 		}
 	}
  
 	$.extend($.fn, {
-		concreteData: function() {
-			return concreteData(this, '__base', arguments);
+		entwineData: function() {
+			return entwineData(this, '__base', arguments);
 		}
 	});
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 60,
 		
 		bind: function(selector, k, v) {
-			if (k.charAt(0) != k.charAt(0).toUpperCase()) $.concrete.warn('Concrete property '+k+' does not start with a capital letter', $.concrete.WARN_LEVEL_BESTPRACTISE);
+			if (k.charAt(0) != k.charAt(0).toUpperCase()) $.entwine.warn('Entwine property '+k+' does not start with a capital letter', $.entwine.WARN_LEVEL_BESTPRACTISE);
 
 			// Create the getters and setters
 
 			var getterName = 'get'+k;
 			var setterName = 'set'+k;
 
-			this.bind_proxy(selector, getterName, function() { return this.concreteData(k) || v ; });
-			this.bind_proxy(selector, setterName, function(v){ return this.concreteData(k, v); });
+			this.bind_proxy(selector, getterName, function() { return this.entwineData(k) || v ; });
+			this.bind_proxy(selector, setterName, function(v){ return this.entwineData(k, v); });
 			
 			// Get the get and set proxies we just created
 			
@@ -1537,13 +1537,39 @@ var console;
 		
 		namespaceMethodOverrides: function(namespace){
 			return {
-				concreteData: function() {
-					return concreteData(this, namespace.name, arguments);
+				entwineData: function() {
+					return entwineData(this, namespace.name, arguments);
 				}
 			};
 		}
 	});
 	
+})(jQuery);
+;
+
+
+/* src/jquery.entwine.legacy.js */
+
+(function($) {	
+	
+	// Adds back concrete methods for backwards compatibility
+	$.concrete = $.entwine;
+	$.fn.concrete = $.fn.entwine;
+	$.fn.concreteData = $.fn.entwineData;
+	
+	// Use addHandler to hack in the namespace.$.concrete equivilent to the namespace.$.entwine namespace-injection
+	$.entwine.Namespace.addHandler({
+		order: 100,
+		bind: function(selector, k, v) { return false; },
+	
+		namespaceMethodOverrides: function(namespace){
+			namespace.$.concrete = namespace.$.entwine;
+			namespace.injectee.concrete = namespace.injectee.entwine;
+			namespace.injectee.concreteData = namespace.injectee.entwineData;
+			return {};
+		}
+	});
+
 })(jQuery);
 ;
 

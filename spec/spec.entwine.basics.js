@@ -1,8 +1,8 @@
 
-describe 'Concrete'
+describe 'Entwine'
   describe 'Basics'
     before
-      $.concrete.warningLevel = $.concrete.WARN_LEVEL_BESTPRACTISE;
+      $.entwine.warningLevel = $.entwine.WARN_LEVEL_BESTPRACTISE;
       $('body').append('<div id="dom_test"></div>');
     end
     after
@@ -10,26 +10,26 @@ describe 'Concrete'
     end
   
     before_each
-      $.concrete.clear_all_rules();
+      $.entwine.clear_all_rules();
       $('#dom_test').html('<div id="a" class="a b c" data-fieldtype="foo"></div><div id="b" class="c d e"></div>');
     end
 
     it 'can attach and call a base function'
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){return this.attr('id');}
       });
       $('.a').foo().should.equal 'a'
     end
     
     it 'can attach and call a base function on a selector using a data attribute selection'
-      $('[data-fieldtype=foo]').concrete({
+      $('[data-fieldtype=foo]').entwine({
         foo: function(){return this.attr('id');}
       });
       $('.a').foo().should.equal 'a'
     end
 
     it 'can attach and call several base functions'
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){return 'foo_' + this.attr('id');},
         bar: function(){return 'bar_' + this.attr('id');}
       }); 
@@ -38,29 +38,29 @@ describe 'Concrete'
     end
 
     it 'can attach and call a namespaced function'
-      $.concrete('bar', function($){
-        $('#a').concrete({
+      $.entwine('bar', function($){
+        $('#a').entwine({
           foo: function(){return this.attr('id');}
         });
       });
-      $('.a').concrete('bar').foo().should.equal 'a'
+      $('.a').entwine('bar').foo().should.equal 'a'
     end
 
     it 'can attach and call a nested namespaced function'
-      $.concrete('qux.baz.bar', function($){
-        $('#a').concrete({
+      $.entwine('qux.baz.bar', function($){
+        $('#a').entwine({
           foo: function(){return this.attr('id');}
         });
       });
-      $('.a').concrete('qux.baz.bar').foo().should.equal 'a'
+      $('.a').entwine('qux.baz.bar').foo().should.equal 'a'
     end
 
     it 'can call two functions on two elements'
       var res = []
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){res.push(this.attr('id'));}
       });
-      $('#b.c').concrete({
+      $('#b.c').entwine({
         foo: function(){res.push(this.attr('id'));}
       });
       $('#dom_test div').foo();
@@ -69,15 +69,15 @@ describe 'Concrete'
 
     it 'can call two namespaced functions on two elements'
       var res = []
-      $.concrete('bar', function($){
-        $('#a').concrete({
+      $.entwine('bar', function($){
+        $('#a').entwine({
           foo: function(){res.push(this.attr('id'));}
         });
-        $('#b.c').concrete({
+        $('#b.c').entwine({
           foo: function(){res.push(this.attr('id'));}
         });
       });
-      $('#dom_test div').concrete('bar').foo();
+      $('#dom_test div').entwine('bar').foo();
       res.should.eql ['b', 'a']
     end
 

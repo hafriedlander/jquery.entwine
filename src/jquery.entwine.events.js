@@ -17,7 +17,7 @@
 	}
 
 	/* Add the methods to handle event binding to the Namespace class */
-	$.concrete.Namespace.addMethods({
+	$.entwine.Namespace.addMethods({
 		build_event_proxy: function(name) {
 			var one = this.one(name, 'func');
 			
@@ -108,7 +108,7 @@
 		},
 		
 		bind_event: function(selector, name, func, event) {
-			var funcs = this.store[name] || (this.store[name] = $.concrete.RuleList()) ;
+			var funcs = this.store[name] || (this.store[name] = $.entwine.RuleList()) ;
 			var proxies = funcs.proxies || (funcs.proxies = {});
 			
 			var rule = funcs.addRule(selector, name); rule.func = func;
@@ -134,18 +134,18 @@
 						break;
 					case 'onfocus':
 					case 'onblur':
-						$.concrete.warn('Event '+event+' not supported - using focusin / focusout instead', $.concrete.WARN_LEVEL_IMPORTANT);
+						$.entwine.warn('Event '+event+' not supported - using focusin / focusout instead', $.entwine.WARN_LEVEL_IMPORTANT);
 				}
 				
 				// If none of the special handlers created a proxy, use the generic proxy
 				if (!proxies[name]) proxies[name] = this.build_event_proxy(name);
 				
-				$(document).bind(event+'.concrete', proxies[name]);
+				$(document).bind(event+'.entwine', proxies[name]);
 			}
 		}
 	});
 	
-	$.concrete.Namespace.addHandler({
+	$.entwine.Namespace.addHandler({
 		order: 40,
 		
 		bind: function(selector, k, v){

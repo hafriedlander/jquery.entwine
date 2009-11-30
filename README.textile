@@ -1,29 +1,29 @@
-h1. Concrete - Support for ConcreteUI programming in jQuery
+h1. Entwine - Support for Concrete UI style programming in jQuery
 
 By Hamish Friedlander, with thanks to "SilverStripe":http://www.silverstripe.com/
 
-Concrete tries to provide a new model of code organisation - a replacement for Object Oriented programming that is focused on adding functions to groups of DOM elements based on the structure and contents of those DOM elements. It's a merging of the model and view layer that initially seems weird, but can give very powerful results.
+Entwine tries to provide a new model of code organisation - a replacement for Object Oriented programming that is focused on adding functions to groups of DOM elements based on the structure and contents of those DOM elements. It's a merging of the model and view layer that initially seems weird, but can give very powerful results.
 
 We're standing on the shoulders of giants here - combining ideas from Prototype's behaviour & lowpro and jQuery's effen & livequery (who themselves stole ideals from Self's Morphic UI and others), but extending & combining the concepts presented in those tools to provide a complete alternative to traditional OO concepts - self-aware methods, inheritance, polymorphisim and namespacing without a single class definition.
 
 h2. Getting Started
 
-* Walk through the "Tutorial":http://hafriedlander.github.com/jquery.concrete/tutorial/
+* Walk through the "Tutorial":http://hafriedlander.github.com/jquery.entwine/tutorial/
 * Watch the "Screencast":http://www.vimeo.com/6353390 (shot during a introductory developer meeting at SilverStripe)
-* Join the "Google Group":http://groups.google.com/group/jquery-concrete and let us know what you think, or what other features you'd like to see
+* Join the "Google Group":http://groups.google.com/group/jquery-entwine and let us know what you think, or what other features you'd like to see
 
-h2. Warning: Pending name change
+h2. Name change
 
-"Concrete5":http://www.concrete5.org/ has asserted their trademark, and requested I change the name of this project to avoid confusion with their CMS product. Since they asked nicely, a name change is pending. The current method names will be retained as aliases, so no code will break. What the new name will be is still under discussion - check the "Google Group Discussion":http://groups.google.com/group/jquery-concrete/browse_thread/thread/c62dd699f3fe2e83 for the latest.
+jQuery Entwine used to be called jQuery Concrete. The name was changed to avoid confusion with another product. The concrete function remains as an alias, but all new code should use entwine
 
 h2. Basic use
 
 h4. First intro
 
-To attach methods to DOM nodes, call the `concrete` function on a jQuery selector object, passing a hash listing the method names and bodys
+To attach methods to DOM nodes, call the `entwine` function on a jQuery selector object, passing a hash listing the method names and bodys
 
 <pre><code>
-  $('div').concrete({
+  $('div').entwine({
     foo: function(..){..},
     bar: function(..){..}
   });
@@ -50,13 +50,13 @@ Given this DOM structure:
   </body>
 </code></pre>
 
-And this concrete definition
+And this entwine definition
 
 <pre><code>
-  $('.internal_text').concrete({
+  $('.internal_text').entwine({
     foo: function(){ console.log(this.text()); }
   });
-  $('.attribute_text').concrete({
+  $('.attribute_text').entwine({
     foo: function(){ console.log(this.attr('rel')); }
   });
 </code></pre>
@@ -76,12 +76,12 @@ Will log this to the console
 
 h4. Limitations
 
-When defining methods, the jQuery object that concrete is called on must be a plain selector, without context. These examples will not work
+When defining methods, the jQuery object that entwine is called on must be a plain selector, without context. These examples will not work
 
 <pre><code>
-  $('div', el).concrete(...)
-  $([ela, elb, elc]).concrete(...)
-  $('<div id="a"></div>').concrete(...)
+  $('div', el).entwine(...)
+  $([ela, elb, elc]).entwine(...)
+  $('<div id="a"></div>').entwine(...)
 </code></pre>
 
 h2. Live
@@ -104,13 +104,13 @@ Another example. Given this DOM structure
   </body>
 </code></pre>
 
-And this concrete definition
+And this entwine definition
 
 <pre><code>
-  $('div').concrete({
+  $('div').entwine({
     foo: function(){ console.log(this.text()); }
   });
-  $('.attribute_text').concrete({
+  $('.attribute_text').entwine({
     foo: function(){ console.log(this.attr('rel')); }
   });
 </code></pre>
@@ -138,10 +138,10 @@ name. Just like other functions this binding will be live, and only the most spe
   <head>
     <script type='text/javascript'>
       /* No need for onready wrapper. Events are bound as needed */
-      $('div').concrete({
+      $('div').entwine({
         onclick: function(){ this.css({backgroundColor: 'blue'}); }
       });
-      $('.green').concrete({
+      $('.green').entwine({
         onclick: function(){ this.css({color: 'green'}); }
       });
     </script>
@@ -157,7 +157,7 @@ h2. Constructors / Destructors
 Declaring a function with the name `onmatch` will create a behavior that is called on each object when it matches. Likewise, `onunmatch` will
 be called when an object that did match this selector stops matching it (because it is removed, or because you've changed its properties).
 
-Note that an onunmatch block must be paired with an onmatch block - an onunmatch without an onmatch _in the same concrete definition block_ is illegal
+Note that an onunmatch block must be paired with an onmatch block - an onunmatch without an onmatch _in the same entwine definition block_ is illegal
 
 Like other functions, only the most specific definition will be used. However, because property changes are not atomic, this may not work as you
 expect.
@@ -167,8 +167,8 @@ h2. Namespaces
 To avoid name clashes, to allow multiple bindings to the same event, and to generally seperate a set of functions from other code you can use namespaces
 
 <pre><code>
-  $.concrete('foo.bar', function($){
-    $('div').concrete({
+  $.entwine('foo.bar', function($){
+    $('div').entwine({
       baz: function(){}
     });
   });
@@ -177,19 +177,19 @@ To avoid name clashes, to allow multiple bindings to the same event, and to gene
 You can then call these functions like this:
 
 <pre><code>
-  $('div').concrete('foo.bar').baz()
+  $('div').entwine('foo.bar').baz()
 </code></pre>
   
 Namespaced functions work just like regular functions (`this` is still set to a matching DOM Node). However, specifity is calculated per namespace.
 This is particularly useful for events, because given this:
 
 <pre><code>
-  $('div').concrete({
+  $('div').entwine({
     onclick: function(){ this.css({backgroundColor: 'blue'}); }
   });
   
-  $.concrete('foo', function($){
-    $('div').concrete({
+  $.entwine('foo', function($){
+    $('div').entwine({
       onclick: function(){ this.css({color: 'green'}); }
     });
   });
@@ -207,14 +207,14 @@ Inside a namespace definition, functions remember the namespace they are in, and
 Where they don't exist, they will be looked up in the base namespace
 
 <pre><code>
-  $.concrete('foo', function($){
-    $('div').concrete({
+  $.entwine('foo', function($){
+    $('div').entwine({
       bar: function() { this.baz(); this.qux(); }
       baz: function() { console.log('baz'); }
     })
   })
   
-  $('div').concrete({
+  $('div').entwine({
     qux: function() { console.log('qux'); }
   })
 </code></pre>
@@ -227,20 +227,20 @@ Note that 'exists' means that a function is declared in this namespace for _any_
   <div>Internal text</div>
 </code></pre>
 
-And the concrete definitions
+And the entwine definitions
 
 <pre><code>
-  $.concrete('foo', function($){
-    $('div').concrete({
+  $.entwine('foo', function($){
+    $('div').entwine({
       bar: function() { this.baz(); }
     });
-    $('span').concrete({
+    $('span').entwine({
       baz: function() { console.log('a'); }
     });
   })
   
   
-  $('div').concrete({
+  $('div').entwine({
     baz: function() { console.log('b'); }
   })
 </code></pre>
@@ -249,15 +249,15 @@ Then doing $('div').bar(); will _not_ display b. Even though the span rule could
 
 h4. Nesting namespace blocks
 
-You can also nest declarations. In this next example, we're defining the functions $().concrete('zap').bar() and $().concrete('zap.pow').baz()
+You can also nest declarations. In this next example, we're defining the functions $().entwine('zap').bar() and $().entwine('zap.pow').baz()
 
 <pre><code>
-  $.concrete('zap', function($){
-    $('div').concrete({
+  $.entwine('zap', function($){
+    $('div').entwine({
       bar: function() { .. }
     })
-    $.concrete('pow', function($){
-      $('div').concrete({
+    $.entwine('pow', function($){
+      $('div').entwine({
         baz: function() { .. }
       })
     })
@@ -268,12 +268,12 @@ h4. Calling to another namespace (and forcing base)
 
 Inside a namespace, namespace lookups are by default relative to the current namespace.
 
-In some situations (such as the last example) you may want to force using the base namespace. In this case you can call concrete with the first argument being the base namespace code '.'. For example, if the first definition in the previous example was
+In some situations (such as the last example) you may want to force using the base namespace. In this case you can call entwine with the first argument being the base namespace code '.'. For example, if the first definition in the previous example was
 
 <pre><code>
-  $.concrete('foo', function($){
-    $('div').concrete({
-      bar: function() { this.concrete('.').baz(); }
+  $.entwine('foo', function($){
+    $('div').entwine({
+      bar: function() { this.entwine('.').baz(); }
     })
   })
 </code></pre>
@@ -282,16 +282,16 @@ Then b _would_ be output to the console.
 
 h4. Using
 
-Sometimes a block outside of a namespace will need to refer to that namespace repeatedly. By passing a function to the concrete function, you can change the looked-up namespace
+Sometimes a block outside of a namespace will need to refer to that namespace repeatedly. By passing a function to the entwine function, you can change the looked-up namespace
 
 <pre><code>
-  $.concrete('foo', function($){
-    $('div').concrete({
+  $.entwine('foo', function($){
+    $('div').entwine({
       bar: function() { console.log('a'); }
     })
   })
   
-  $('div').concrete('foo', function(){
+  $('div').entwine('foo', function(){
     this.bar();
     this.bar();
     this.bar();

@@ -12,7 +12,7 @@
 		check_id = null;
 	}
 	
-	$.extend($.concrete, {
+	$.extend($.entwine, {
 		/**
 		 * Make onmatch and onunmatch work in synchronous mode - that is, new elements will be detected immediately after
 		 * the DOM manipulation that made them match. This is only really useful for during testing, since it's pretty slow

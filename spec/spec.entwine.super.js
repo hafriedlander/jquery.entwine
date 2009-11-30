@@ -1,5 +1,5 @@
 
-describe 'Concrete'
+describe 'Entwine'
   describe 'Super'
     before
       $('body').append('<div id="dom_test"></div>')
@@ -9,16 +9,16 @@ describe 'Concrete'
     end
   
     before_each
-      $.concrete.clear_all_rules()
+      $.entwine.clear_all_rules()
       $('#dom_test').html('<div id="a" class="a b c">Foo</div><div id="b" class="c d e">Bar</div>')
     end
 
     it 'can call the super function'
       var a = 1;
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){a *= 2;}
       });
-      $('#a.a').concrete({
+      $('#a.a').entwine({
         foo: function(){a += 2; this._super();}
       });
       $('#a').foo();
@@ -27,10 +27,10 @@ describe 'Concrete'
     
     it 'super to a non-existant class should be ignored'
       var a = 1;
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){a *= 2; this._super();}
       });
-      $('#a.a').concrete({
+      $('#a.a').entwine({
         foo: function(){a += 2; this._super();}
       });
       $('#a').foo();
@@ -39,11 +39,11 @@ describe 'Concrete'
     
     it 'can call super from two different functions without screwing up what super points to'
       var list = [];
-      $('#a').concrete({
+      $('#a').entwine({
         foo: function(){ list.push('foo'); this.bar(); },
         bar: function(){ list.push('bar'); }
       });
-      $('#a.a').concrete({
+      $('#a.a').entwine({
         foo: function(){ list.push('foo2'); this._super(); list.push('foo2'); this._super(); },
         bar: function(){ list.push('bar2'); this._super(); }
       });
@@ -51,9 +51,9 @@ describe 'Concrete'
       list.should.eql [ 'foo2', 'foo', 'bar2', 'bar', 'foo2', 'foo', 'bar2', 'bar' ]
     end
     
-    it 'can override (and call via super) a non-concrete jquery function'
+    it 'can override (and call via super) a non-entwine jquery function'
       var a = 1
-      $('#a').concrete({
+      $('#a').entwine({
         text: function(){ a = this._super(); }
       });
       

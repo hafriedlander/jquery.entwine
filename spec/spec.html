@@ -10,21 +10,21 @@
 		<script src="../vendor/jquery.selector/jquery.selector.specifity.js"></script>
 		<script src="../vendor/jquery.selector/jquery.selector.matches.js"></script>
 		
-		<script src="../src/jquery.concrete.js"></script>
-		<script src="../src/jquery.concrete.dommaybechanged.js"></script>
-		<script src="../src/jquery.concrete.events.js"></script>
-		<script src="../src/jquery.concrete.ctors.js"></script>
-		<script src="../src/jquery.concrete.properties.js"></script>
+		<script src="../src/jquery.entwine.js"></script>
+		<script src="../src/jquery.entwine.dommaybechanged.js"></script>
+		<script src="../src/jquery.entwine.events.js"></script>
+		<script src="../src/jquery.entwine.ctors.js"></script>
+		<script src="../src/jquery.entwine.properties.js"></script>
 		
 		<script>
 			function runSuites() {
 				JSpec
-				.exec('spec.concrete.basics.js')
-				.exec('spec.concrete.namespaces.js')
-				.exec('spec.concrete.super.js')
-				.exec('spec.concrete.events.js')
-				.exec('spec.concrete.ctors.js')
-				.exec('spec.concrete.properties.js')
+				.exec('spec.entwine.basics.js')
+				.exec('spec.entwine.namespaces.js')
+				.exec('spec.entwine.super.js')
+				.exec('spec.entwine.events.js')
+				.exec('spec.entwine.ctors.js')
+				.exec('spec.entwine.properties.js')
 				.run()
 				.report()
 			}

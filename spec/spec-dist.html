@@ -6,17 +6,17 @@
 		<script src="../vendor/jspec/lib/jspec.js"></script>
 		<script src="../vendor/jspec/lib/jspec.jquery.js"></script>
 		
-		<script src="../dist/jquery.concrete-dist.js"></script>
+		<script src="../dist/jquery.entwine-dist.js"></script>
 		
 		<script>
 			function runSuites() {
 				JSpec
-				.exec('spec.concrete.basics.js')
-				.exec('spec.concrete.namespaces.js')
-				.exec('spec.concrete.super.js')
-				.exec('spec.concrete.events.js')
-				.exec('spec.concrete.ctors.js')
-				.exec('spec.concrete.properties.js')
+				.exec('spec.entwine.basics.js')
+				.exec('spec.entwine.namespaces.js')
+				.exec('spec.entwine.super.js')
+				.exec('spec.entwine.events.js')
+				.exec('spec.entwine.ctors.js')
+				.exec('spec.entwine.properties.js')
 				.run()
 				.report()
 			}
