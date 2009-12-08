@@ -10,7 +10,7 @@
 	var triggerEvent = function() {
 		$(document).triggerHandler('DOMMaybeChanged');
 		check_id = null;
-	}
+	};
 	
 	$.extend($.entwine, {
 		/**
@@ -20,7 +20,7 @@
 		 */
 		synchronous_mode: function() {
 			if (check_id) clearTimeout(check_id); check_id = null;
-			runSoon = function(func, delay){ func.call(this); return null; }
+			runSoon = function(func, delay){ func.call(this); return null; };
 		},
 		
 		/**
@@ -39,8 +39,8 @@
 				var rv = old.apply(this, arguments);
 				if (!check_id) check_id = runSoon(triggerEvent, 100);
 				return rv;
-			}
-		})
+			};
+		});
 	}
 	
 	function registerSetterGetterFunction() {
@@ -50,8 +50,8 @@
 				var rv = old.apply(this, arguments);
 				if (!check_id && (b !== undefined || typeof a != 'string')) check_id = runSoon(triggerEvent, 100);
 				return rv;
-			}
-		})
+			};
+		});
 	}
 
 	// Register core DOM manipulation methods
@@ -59,6 +59,6 @@
 	registerSetterGetterFunction('attr');
 	
 	// And on DOM ready, trigger matching once
-	$(function(){ triggerEvent(); })
+	$(function(){ triggerEvent(); });
 	
 })(jQuery);

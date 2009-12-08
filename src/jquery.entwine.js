@@ -6,7 +6,7 @@ var console;
 
 	$.entwine = function() {
 		$.fn.entwine.apply(null, arguments);
-	}
+	};
 	
 	/**
 	 * A couple of utility functions for accessing the store outside of this closure, and for making things
@@ -81,7 +81,7 @@ var console;
 		       (as[1] - bs[1]) ||
 		       (as[2] - bs[2]) ||
 		       (a.rulecount - b.rulecount) ;
-	}
+	};
 
 	$.entwine.RuleList = function() {
 		var list = [];
@@ -96,7 +96,7 @@ var console;
 		};
 		
 		return list;
-	}
+	};
 
 	var handlers = [];
 	
@@ -114,12 +114,12 @@ var console;
 			namespaces[name] = this;
 			
 			if (name == "__base") {
-				this.injectee = $.fn
+				this.injectee = $.fn;
 				this.$ = $;
 			}
 			else {
 				// We're in a namespace, so we build a Class that subclasses the jQuery Object Class to inject namespace functions into
-				var subfn = function(){}
+				var subfn = function(){};
 				this.injectee = subfn.prototype = new $();
 				
 				// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
@@ -133,7 +133,7 @@ var console;
 					rv.selector = jq.selector; rv.context = jq.context; var i = rv.length = jq.length;
 					while (i--) rv[i] = jq[i];
 					return rv;
-				}
+				};
 				this.injectee.pushStack = function(elems, name, selector){
 					var ret = bound$(elems);
 
@@ -146,7 +146,7 @@ var console;
 					
 					// Return the newly-formed element set
 					return ret;
-				}
+				};
 				
 				// Copy static functions through from $ to this.$ so e.g. $.ajax still works
 				// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
@@ -160,11 +160,11 @@ var console;
 					else if (spacename.charAt(0) != '.') args[0] = name+'.'+spacename;
 					
 					return $.fn.entwine.apply(this, args);
-				}
+				};
 				
 				this.$.entwine = function() {
 					entwine_wrapper.apply(null, arguments);
-				}
+				};
 				
 				for (var i = 0; i < handlers.length; i++) {
 					var handler = handlers[i], builder;
@@ -208,7 +208,7 @@ var console;
 				}
 				// If we didn't find a entwine-defined function, but there is a non-entwine function to use as a base, try that
 				if (basefunc) return basefunc.apply(namespace.$(el), args);
-			}
+			};
 			
 			return one;
 		},
@@ -279,7 +279,7 @@ var console;
 	$.entwine.Namespace.addHandler = function(handler) {
 		for (var i = 0; i < handlers.length && handlers[i].order < handler.order; i++) { /* Pass */ }
 		handlers.splice(i, 0, handler);
-	}
+	};
 	
 	$.entwine.Namespace.addHandler({
 		order: 50,

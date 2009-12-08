@@ -8,12 +8,12 @@
 	if (document.compareDocumentPosition) {
 		var is_or_contains = function(a, b) {
 			return a && b && (a == b || !!(a.compareDocumentPosition(b) & 16));
-		}
+		};
 	}
 	else {
 		var is_or_contains = function(a, b) {
 			return a && b && (a == b || (a.contains ? a.contains(b) : true));
-		}
+		};
 	}
 
 	/* Add the methods to handle event binding to the Namespace class */
@@ -165,7 +165,7 @@
 	var delegate_submit = function(e, data){ 
 		var delegationEvent = $.Event('delegatedSubmit'); delegationEvent.delegatedEvent = e;
 		return $(document).trigger(delegationEvent, data); 
-	}
+	};
 
 	$(document).bind('DOMMaybeChanged', function(){
 		var forms = $('form');

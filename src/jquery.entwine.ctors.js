@@ -33,7 +33,7 @@
 						catch(e) { $.entwine.warn_exception(name, el, e); } 
 						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
-				}
+				};
 				
 				ctors[name+'proxy'] = proxy;
 			}
@@ -69,7 +69,7 @@
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
-				var matched = $([]), add, rem, res, rule, ctor, dtor;
+				var matched = $([]), add, rem, res, rule, sel, ctor, dtor;
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
@@ -104,7 +104,7 @@
 				}
 			}
 		}
-	})
+	});
 	
 
 })(jQuery);

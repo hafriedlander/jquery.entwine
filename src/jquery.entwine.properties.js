@@ -4,11 +4,11 @@
 	
 	var getEntwineData = function(el, namespace, property) {
 		return el.data(entwine_prepend + namespace + '!' + property);
-	}
+	};
 	
 	var setEntwineData = function(el, namespace, property, value) {
 		return el.data(entwine_prepend + namespace + '!' + property, value);
-	}
+	};
 	
 	var getEntwineDataAsHash = function(el, namespace) {
 		var hash = {};
@@ -23,11 +23,11 @@
 		}
 		
 		return hash;
-	}
+	};
 	
 	var setEntwineDataFromHash = function(el, namespace, hash) {
 		for (var k in hash) setEntwineData(namespace, k, hash[k]);
-	}
+	};
 
 	var entwineData = function(el, namespace, args) {
 		switch (args.length) {
@@ -39,7 +39,7 @@
 			default:
 				return setEntwineData(el, namespace, args[0], args[1]);
 		}
-	}
+	};
  
 	$.extend($.fn, {
 		entwineData: function() {
