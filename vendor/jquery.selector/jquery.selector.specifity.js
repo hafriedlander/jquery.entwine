@@ -13,7 +13,7 @@
 		});
 		
 		return this.spec = spec;
-	})
+	});
 
 	$.selector.Selector.addMethod('specifity', function(){
 		if (this.spec) return this.spec;
@@ -25,7 +25,7 @@
 		});
 		
 		return this.spec = spec;	
-	})
+	});
 	
 	$.selector.SelectorsGroup.addMethod('specifity', function(){
 		if (this.spec) return this.spec;
@@ -36,7 +36,7 @@
 		});
 		
 		return this.spec = spec;	
-	})
+	});
 	
 	
 })(jQuery);

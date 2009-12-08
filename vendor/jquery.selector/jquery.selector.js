@@ -21,7 +21,7 @@
 		
 		WITHN: /([-+])?(INTEGER)?(n)\s*(?:([-+])\s*(INTEGER))?/,
 		WITHOUTN: /([-+])?(INTEGER)/
-	}
+	};
 	
 	var rx = {
 		not: /:not\(/,
@@ -38,12 +38,12 @@
 		comb: /\s*(\+|~|>)\s*|\s+/,
 		comma: /\s*,\s*/,
 		important: /\s+!important\s*$/
-	}
+	};
 
 	/* Replace placeholders with actual regex, and mark all as case insensitive */
 	var token = /[A-Z][A-Z0-9]+/;
 	for (var k in rx) {
-		var src = rx[k].source;
+		var m, src = rx[k].source;
 		while (m = src.match(token)) src = src.replace(m[0], tokens[m[0]].source);
 		rx[k] = new RegExp(src, 'gi');
 	}
@@ -77,7 +77,7 @@
 		done: function() {
 			return this.pos == this.str.length;
 		}
-	})
+	});
 	
 	/* A base class that all Selectors inherit off */
 	var SelectorBase = Base.extend({});
@@ -104,7 +104,7 @@
 			/* Then for each selection type, try and find a match */
 			do {
 				if (m = selector.match(rx.not)) {
-					this.nots[this.nots.length] = SelectorsGroup().parse(selector)
+					this.nots[this.nots.length] = SelectorsGroup().parse(selector);
 					if (!(m = selector.match(rx.not_end))) {
 						throw 'Invalid :not term in selector';
 					}
@@ -130,7 +130,7 @@
 			
 			return this;
 		}
-	})
+	});
 
 	/**
 	 * A class representing a Selector, as per the CSS3 selector spec
@@ -178,11 +178,11 @@
 		
 		if (!cons.done()) throw 'Could not parse selector - ' + cons.showpos() ;
 		else return res;
-	}
+	};
 	
 	$.selector.SelectorBase = SelectorBase;
 	$.selector.SimpleSelector = SimpleSelector;
 	$.selector.Selector = Selector;
 	$.selector.SelectorsGroup = SelectorsGroup;
 	
-})(jQuery)
+})(jQuery);

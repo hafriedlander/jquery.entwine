@@ -12,17 +12,18 @@ var Base;
 
 (function(){
 	
-	var marker = {}, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+	var marker = {}, fnTest = /xyz/.test(function(){var xyz;}) ? /\b_super\b/ : /.*/;
 
 	// The base Class implementation (does nothing)
 	Base = function(){};
  
 	Base.addMethod = function(name, func) {
-		var _super = this._super;
-		if (_super && fnTest.test(func))	 {
+		var parent = this._super && this._super.prototype;
+		
+		if (parent && fnTest.test(func)) {
 			this.prototype[name] = function(){
 				var tmp = this._super;
-				this._super = _super[name];
+				this._super = parent[name];
 				try {
 					var ret = func.apply(this, arguments);
 				}
@@ -30,17 +31,25 @@ var Base;
 					this._super = tmp;
 				}
 				return ret;
-			}
+			};
 		}
 		else this.prototype[name] = func;
-	}
+	};
 
 	Base.addMethods = function(props) {
 		for (var name in props) {
 			if (typeof props[name] == 'function') this.addMethod(name, props[name]);
 			else this.prototype[name] = props[name];
 		}
-	}
+	};
+
+	Base.subclassOf = function(parentkls) {
+		var kls = this;
+		while (kls) {
+			if (kls === parentkls) return true;
+			kls = kls._super;
+		}
+	};
  
 	// Create a new Class that inherits from this class
 	Base.extend = function(props) {
@@ -55,18 +64,21 @@ var Base;
 			else {
 				var ret = new Kls(marker); if (ret.init) ret.init.apply(ret, arguments); return ret;
 			}
-		}
+		};
    
 		// Add the common class variables and methods
 		Kls.constructor = Kls;
 		Kls.extend = Base.extend;
 		Kls.addMethod = Base.addMethod;
 		Kls.addMethods = Base.addMethods;
-		Kls._super = this.prototype;
+		Kls.subclassOf = Base.subclassOf;
+		
+		Kls._super = this;
 	
 		// Attach the parent object to the inheritance chain
 		Kls.prototype = new this(marker);
-	
+		Kls.prototype.constructor = Kls;
+
 		// Copy the properties over onto the new prototype
 		Kls.addMethods(props);
 		

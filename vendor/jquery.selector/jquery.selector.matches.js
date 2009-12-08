@@ -18,16 +18,16 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	// Does browser support Element.children
 	var hasChildren = div.children && div.children[0].tagName == 'FORM';
 
-	var FUNC_IN  = /^\s*function\s*\([^)]*\)\s*{/;
+	var FUNC_IN  = /^\s*function\s*\([^)]*\)\s*\{/;
 	var FUNC_OUT = /}\s*$/;
 
 	var funcToString = function(f) {
 		return (''+f).replace(FUNC_IN,'').replace(FUNC_OUT,'');
-	}
+	};
 
 	// Can we use Function#toString ?
 	try {
-		var testFunc = function(){ return 'good' };
+		var testFunc = function(){ return 'good'; };
 		if ((new Function('',funcToString(testFunc)))() != 'good') funcToString = false;
 	}
 	catch(e) { funcToString = false; console.log(e.message);/*pass*/ }
@@ -41,26 +41,26 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	
 	var join = function(js) {
 		return js.join('\n');
-	}
+	};
 	
 	var join_complex = function(js) {
-		code = new String(js.join('\n')); // String objects can have properties set. strings can't
+		var code = new String(js.join('\n')); // String objects can have properties set. strings can't
 		code.complex = true;
 		return code;
-	}
+	};
 	
 	/**** ATTRIBUTE ACCESSORS ****/
 	
 	// Not all attribute names can be used as identifiers, so we encode any non-acceptable characters as hex
 	var varForAttr = function(attr) {
 		return '_' + attr.replace(/^[^A-Za-z]|[^A-Za-z0-9]/g, function(m){ return '_0x' + m.charCodeAt(0).toString(16) + '_'; });
-	}
+	};
 	
 	var getAttr;
 	
 	// Good browsers
 	if (!getAttributeDodgy) {
-		getAttr = function(attr){ return 'var '+varForAttr(attr)+' = el.getAttribute("'+attr+'");' ; }
+		getAttr = function(attr){ return 'var '+varForAttr(attr)+' = el.getAttribute("'+attr+'");' ; };
 	}
 	// IE 6, 7
 	else {
@@ -70,7 +70,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		getAttr = function(attr) {
 			var ieattr = getAttrIEMap[attr] || attr;
 			return 'var '+varForAttr(attr)+' = el.getAttribute("'+ieattr+'",2) || (el.getAttributeNode("'+attr+'")||{}).nodeValue;';
-		}
+		};
 	}
 	
 	/**** ATTRIBUTE COMPARITORS ****/
@@ -83,7 +83,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		'^=': '!K || K.indexOf("V") != 0',
 		'*=': '!K || K.indexOf("V") == -1',
 		'$=': '!K || K.substr(K.length-"V".length) != "V"'
-	}
+	};
 
 	/**** STATE TRACKER ****/
 	
@@ -111,7 +111,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			return join([
 				'while(el = el.previousSibling){',
 					'if (el.nodeType != 1) continue;',
-					body,
+					body
 			]);
 		},
 		parent: function() {
@@ -152,7 +152,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	var pseudoclschecks = {
 		'first-child': join([
 			'var cel = el;',
-			'while(cel = cel.previousSibling){ if (cel.nodeType === 1) BAD; }',
+			'while(cel = cel.previousSibling){ if (cel.nodeType === 1) BAD; }'
 		]),
 		'last-child': join([
 			'var cel = el;',
@@ -163,7 +163,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 				'var i = 1, cel = el;',
 				'while(cel = cel.previousSibling){',
 					'if (cel.nodeType === 1) i++;',
-				'}',
+				'}'
 			]);
 			
 			if (a == 0) return join([
@@ -213,7 +213,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			/* Check against class names */
 			$.each(this.classes, function(i, cls){
 				js[js.length] = 'if (_WS__class.indexOf(" '+cls+' ") == -1) BAD;';
-			})
+			});
 		}
 		
 		/* Check against attributes */
@@ -237,7 +237,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 				el.save(lbl),
 				func,
 				el.restore(lbl)
-			])
+			]);
 				
 			js[js.length] = func;
 		});
@@ -253,7 +253,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 					js[js.length] = funcToString(check).replace(/elem/g,'el').replace(/return([^;]+);/,'if (!($1)) BAD;');
 				}
 				else {
-					js[js.length] = 'if (!$.find.selectors.filters.'+pscls[0]+'(el)) BAD;'
+					js[js.length] = 'if (!$.find.selectors.filters.'+pscls[0]+'(el)) BAD;';
 				}
 			}
 		});
@@ -271,7 +271,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			return join([
 				'l'+(++lbl_id)+':{',
 					f.replace(GOOD, 'break l'+lbl_id),
-				'}',
+				'}'
 			]);
 		else
 			return f.replace(GOOD, '');
@@ -319,11 +319,11 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	};
 	
 	$.selector.Selector.addMethod('compile', function(el) {
-		l = this.parts.length;
+		var l = this.parts.length;
 		
-		expr = this.parts[--l].compile(el);
+		var expr = this.parts[--l].compile(el);
 		while (l) {
-			combinator = this.parts[--l];
+			var combinator = this.parts[--l];
 			expr = combines[combinator](el, this.parts[--l], as_subexpr(expr));
 		}
 		
