@@ -23,7 +23,7 @@ var console;
 		 */
 		clear_all_rules: function() { 
 			// Remove proxy functions
-			for (var k in $.fn) { if ($.fn[k].entwine) delete $.fn[k] ; }
+			for (var k in $.fn) { if ($.fn[k].isentwinemethod) delete $.fn[k]; }
 			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
 			$(document).unbind('.entwine');
 			// Remove namespaces, and start over again
@@ -238,12 +238,12 @@ var console;
 			
 			var rule = rulelist.addRule(selector, name); rule.func = func;
 			
-			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].entwine) {
+			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].isentwinemethod) {
 				this.injectee[name] = this.build_proxy(name, this.injectee.hasOwnProperty(name) ? this.injectee[name] : null);
-				this.injectee[name].entwine = true;
+				this.injectee[name].isentwinemethod = true;
 			}
 
-			if (!this.injectee[name].entwine) {
+			if (!this.injectee[name].isentwinemethod) {
 				$.entwine.warn('Warning: Entwine function '+name+' clashes with regular jQuery function - entwine function will not be callable directly on jQuery object', $.entwine.WARN_LEVEL_IMPORTANT);
 			}
 		},
