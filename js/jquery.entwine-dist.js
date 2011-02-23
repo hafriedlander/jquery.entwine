@@ -1,4 +1,4 @@
-/* jQuery.Entwine - Copyright 2009 Hamish Friedlander and SilverStripe. Version . */
+/* jQuery.Entwine - Copyright 2009-2011 Hamish Friedlander and SilverStripe. Version . */
 
 /* vendor/jquery.selector/jquery.class.js */
 
@@ -16,17 +16,18 @@ var Base;
 
 (function(){
 	
-	var marker = {}, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+	var marker = {}, fnTest = /xyz/.test(function(){var xyz;}) ? /\b_super\b/ : /.*/;
 
 	// The base Class implementation (does nothing)
 	Base = function(){};
  
 	Base.addMethod = function(name, func) {
-		var _super = this._super;
-		if (_super && fnTest.test(func))	 {
+		var parent = this._super && this._super.prototype;
+		
+		if (parent && fnTest.test(func)) {
 			this.prototype[name] = function(){
 				var tmp = this._super;
-				this._super = _super[name];
+				this._super = parent[name];
 				try {
 					var ret = func.apply(this, arguments);
 				}
@@ -34,17 +35,25 @@ var Base;
 					this._super = tmp;
 				}
 				return ret;
-			}
+			};
 		}
 		else this.prototype[name] = func;
-	}
+	};
 
 	Base.addMethods = function(props) {
 		for (var name in props) {
 			if (typeof props[name] == 'function') this.addMethod(name, props[name]);
 			else this.prototype[name] = props[name];
 		}
-	}
+	};
+
+	Base.subclassOf = function(parentkls) {
+		var kls = this;
+		while (kls) {
+			if (kls === parentkls) return true;
+			kls = kls._super;
+		}
+	};
  
 	// Create a new Class that inherits from this class
 	Base.extend = function(props) {
@@ -59,18 +68,21 @@ var Base;
 			else {
 				var ret = new Kls(marker); if (ret.init) ret.init.apply(ret, arguments); return ret;
 			}
-		}
+		};
    
 		// Add the common class variables and methods
 		Kls.constructor = Kls;
 		Kls.extend = Base.extend;
 		Kls.addMethod = Base.addMethod;
 		Kls.addMethods = Base.addMethods;
-		Kls._super = this.prototype;
+		Kls.subclassOf = Base.subclassOf;
+		
+		Kls._super = this;
 	
 		// Attach the parent object to the inheritance chain
 		Kls.prototype = new this(marker);
-	
+		Kls.prototype.constructor = Kls;
+
 		// Copy the properties over onto the new prototype
 		Kls.addMethods(props);
 		
@@ -104,7 +116,7 @@ var Base;
 		
 		WITHN: /([-+])?(INTEGER)?(n)\s*(?:([-+])\s*(INTEGER))?/,
 		WITHOUTN: /([-+])?(INTEGER)/
-	}
+	};
 	
 	var rx = {
 		not: /:not\(/,
@@ -121,12 +133,12 @@ var Base;
 		comb: /\s*(\+|~|>)\s*|\s+/,
 		comma: /\s*,\s*/,
 		important: /\s+!important\s*$/
-	}
+	};
 
 	/* Replace placeholders with actual regex, and mark all as case insensitive */
 	var token = /[A-Z][A-Z0-9]+/;
 	for (var k in rx) {
-		var src = rx[k].source;
+		var m, src = rx[k].source;
 		while (m = src.match(token)) src = src.replace(m[0], tokens[m[0]].source);
 		rx[k] = new RegExp(src, 'gi');
 	}
@@ -160,7 +172,7 @@ var Base;
 		done: function() {
 			return this.pos == this.str.length;
 		}
-	})
+	});
 	
 	/* A base class that all Selectors inherit off */
 	var SelectorBase = Base.extend({});
@@ -187,7 +199,7 @@ var Base;
 			/* Then for each selection type, try and find a match */
 			do {
 				if (m = selector.match(rx.not)) {
-					this.nots[this.nots.length] = SelectorsGroup().parse(selector)
+					this.nots[this.nots.length] = SelectorsGroup().parse(selector);
 					if (!(m = selector.match(rx.not_end))) {
 						throw 'Invalid :not term in selector';
 					}
@@ -213,7 +225,7 @@ var Base;
 			
 			return this;
 		}
-	})
+	});
 
 	/**
 	 * A class representing a Selector, as per the CSS3 selector spec
@@ -261,14 +273,14 @@ var Base;
 		
 		if (!cons.done()) throw 'Could not parse selector - ' + cons.showpos() ;
 		else return res;
-	}
+	};
 	
 	$.selector.SelectorBase = SelectorBase;
 	$.selector.SimpleSelector = SimpleSelector;
 	$.selector.Selector = Selector;
 	$.selector.SelectorsGroup = SelectorsGroup;
 	
-})(jQuery)
+})(jQuery);
 ;
 
 
@@ -289,7 +301,7 @@ var Base;
 		});
 		
 		return this.spec = spec;
-	})
+	});
 
 	$.selector.Selector.addMethod('specifity', function(){
 		if (this.spec) return this.spec;
@@ -301,7 +313,7 @@ var Base;
 		});
 		
 		return this.spec = spec;	
-	})
+	});
 	
 	$.selector.SelectorsGroup.addMethod('specifity', function(){
 		if (this.spec) return this.spec;
@@ -312,7 +324,7 @@ var Base;
 		});
 		
 		return this.spec = spec;	
-	})
+	});
 	
 	
 })(jQuery);
@@ -341,16 +353,16 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	// Does browser support Element.children
 	var hasChildren = div.children && div.children[0].tagName == 'FORM';
 
-	var FUNC_IN  = /^\s*function\s*\([^)]*\)\s*{/;
+	var FUNC_IN  = /^\s*function\s*\([^)]*\)\s*\{/;
 	var FUNC_OUT = /}\s*$/;
 
 	var funcToString = function(f) {
 		return (''+f).replace(FUNC_IN,'').replace(FUNC_OUT,'');
-	}
+	};
 
 	// Can we use Function#toString ?
 	try {
-		var testFunc = function(){ return 'good' };
+		var testFunc = function(){ return 'good'; };
 		if ((new Function('',funcToString(testFunc)))() != 'good') funcToString = false;
 	}
 	catch(e) { funcToString = false; console.log(e.message);/*pass*/ }
@@ -364,26 +376,26 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	
 	var join = function(js) {
 		return js.join('\n');
-	}
+	};
 	
 	var join_complex = function(js) {
-		code = new String(js.join('\n')); // String objects can have properties set. strings can't
+		var code = new String(js.join('\n')); // String objects can have properties set. strings can't
 		code.complex = true;
 		return code;
-	}
+	};
 	
 	/**** ATTRIBUTE ACCESSORS ****/
 	
 	// Not all attribute names can be used as identifiers, so we encode any non-acceptable characters as hex
 	var varForAttr = function(attr) {
 		return '_' + attr.replace(/^[^A-Za-z]|[^A-Za-z0-9]/g, function(m){ return '_0x' + m.charCodeAt(0).toString(16) + '_'; });
-	}
+	};
 	
 	var getAttr;
 	
 	// Good browsers
 	if (!getAttributeDodgy) {
-		getAttr = function(attr){ return 'var '+varForAttr(attr)+' = el.getAttribute("'+attr+'");' ; }
+		getAttr = function(attr){ return 'var '+varForAttr(attr)+' = el.getAttribute("'+attr+'");' ; };
 	}
 	// IE 6, 7
 	else {
@@ -393,7 +405,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		getAttr = function(attr) {
 			var ieattr = getAttrIEMap[attr] || attr;
 			return 'var '+varForAttr(attr)+' = el.getAttribute("'+ieattr+'",2) || (el.getAttributeNode("'+attr+'")||{}).nodeValue;';
-		}
+		};
 	}
 	
 	/**** ATTRIBUTE COMPARITORS ****/
@@ -406,7 +418,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 		'^=': '!K || K.indexOf("V") != 0',
 		'*=': '!K || K.indexOf("V") == -1',
 		'$=': '!K || K.substr(K.length-"V".length) != "V"'
-	}
+	};
 
 	/**** STATE TRACKER ****/
 	
@@ -434,7 +446,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			return join([
 				'while(el = el.previousSibling){',
 					'if (el.nodeType != 1) continue;',
-					body,
+					body
 			]);
 		},
 		parent: function() {
@@ -475,7 +487,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	var pseudoclschecks = {
 		'first-child': join([
 			'var cel = el;',
-			'while(cel = cel.previousSibling){ if (cel.nodeType === 1) BAD; }',
+			'while(cel = cel.previousSibling){ if (cel.nodeType === 1) BAD; }'
 		]),
 		'last-child': join([
 			'var cel = el;',
@@ -486,7 +498,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 				'var i = 1, cel = el;',
 				'while(cel = cel.previousSibling){',
 					'if (cel.nodeType === 1) i++;',
-				'}',
+				'}'
 			]);
 			
 			if (a == 0) return join([
@@ -536,7 +548,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			/* Check against class names */
 			$.each(this.classes, function(i, cls){
 				js[js.length] = 'if (_WS__class.indexOf(" '+cls+' ") == -1) BAD;';
-			})
+			});
 		}
 		
 		/* Check against attributes */
@@ -560,7 +572,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 				el.save(lbl),
 				func,
 				el.restore(lbl)
-			])
+			]);
 				
 			js[js.length] = func;
 		});
@@ -576,7 +588,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 					js[js.length] = funcToString(check).replace(/elem/g,'el').replace(/return([^;]+);/,'if (!($1)) BAD;');
 				}
 				else {
-					js[js.length] = 'if (!$.find.selectors.filters.'+pscls[0]+'(el)) BAD;'
+					js[js.length] = 'if (!$.find.selectors.filters.'+pscls[0]+'(el)) BAD;';
 				}
 			}
 		});
@@ -594,7 +606,7 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			return join([
 				'l'+(++lbl_id)+':{',
 					f.replace(GOOD, 'break l'+lbl_id),
-				'}',
+				'}'
 			]);
 		else
 			return f.replace(GOOD, '');
@@ -642,11 +654,11 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 	};
 	
 	$.selector.Selector.addMethod('compile', function(el) {
-		l = this.parts.length;
+		var l = this.parts.length;
 		
-		expr = this.parts[--l].compile(el);
+		var expr = this.parts[--l].compile(el);
 		while (l) {
-			combinator = this.parts[--l];
+			var combinator = this.parts[--l];
 			expr = combines[combinator](el, this.parts[--l], as_subexpr(expr));
 		}
 		
@@ -745,7 +757,7 @@ var console;
 
 	$.entwine = function() {
 		$.fn.entwine.apply(null, arguments);
-	}
+	};
 	
 	/**
 	 * A couple of utility functions for accessing the store outside of this closure, and for making things
@@ -762,7 +774,7 @@ var console;
 		 */
 		clear_all_rules: function() { 
 			// Remove proxy functions
-			for (var k in $.fn) { if ($.fn[k].entwine) delete $.fn[k] ; }
+			for (var k in $.fn) { if ($.fn[k].isentwinemethod) delete $.fn[k]; }
 			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
 			$(document).unbind('.entwine');
 			// Remove namespaces, and start over again
@@ -820,7 +832,7 @@ var console;
 		       (as[1] - bs[1]) ||
 		       (as[2] - bs[2]) ||
 		       (a.rulecount - b.rulecount) ;
-	}
+	};
 
 	$.entwine.RuleList = function() {
 		var list = [];
@@ -835,7 +847,7 @@ var console;
 		};
 		
 		return list;
-	}
+	};
 
 	var handlers = [];
 	
@@ -853,43 +865,53 @@ var console;
 			namespaces[name] = this;
 			
 			if (name == "__base") {
-				this.injectee = $.fn
+				this.injectee = $.fn;
 				this.$ = $;
 			}
 			else {
 				// We're in a namespace, so we build a Class that subclasses the jQuery Object Class to inject namespace functions into
-				var subfn = function(){}
-				this.injectee = subfn.prototype = new $();
 				
-				// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
-				var bound$ = this.$ = function(a) {
-					// Try the simple way first
-					var jq = $.fn.init.apply(new subfn(), arguments);
-					if (jq instanceof subfn) return jq;
-					
-					// That didn't return a bound object, so now we need to copy it
-					var rv = new subfn();
-					rv.selector = jq.selector; rv.context = jq.context; var i = rv.length = jq.length;
-					while (i--) rv[i] = jq[i];
-					return rv;
+				// jQuery 1.5 already provides a nice way to subclass, so use it
+				if ($.sub) {
+					this.$ = $.sub();
+					this.injectee = this.$.prototype;
 				}
-				this.injectee.pushStack = function(elems, name, selector){
-					var ret = bound$(elems);
+				// For jQuery < 1.5 we have to do it ourselves
+				else {
+					var subfn = function(){};
+					this.injectee = subfn.prototype = new $;
+				
+					// And then we provide an overriding $ that returns objects of our new Class, and an overriding pushStack to catch further selection building
+					var bound$ = this.$ = function(a) {
+						// Try the simple way first
+						var jq = $.fn.init.apply(new subfn(), arguments);
+						if (jq instanceof subfn) return jq;
+					
+						// That didn't return a bound object, so now we need to copy it
+						var rv = new subfn();
+						rv.selector = jq.selector; rv.context = jq.context; var i = rv.length = jq.length;
+						while (i--) rv[i] = jq[i];
+						return rv;
+					};
+				
+					this.injectee.pushStack = function(elems, name, selector){
+						var ret = bound$(elems);
 
-					// Add the old object onto the stack (as a reference)
-					ret.prevObject = this;
-					ret.context = this.context;
+						// Add the old object onto the stack (as a reference)
+						ret.prevObject = this;
+						ret.context = this.context;
 					
-					if ( name === "find" ) ret.selector = this.selector + (this.selector ? " " : "") + selector;
-					else if ( name )       ret.selector = this.selector + "." + name + "(" + selector + ")";
+						if ( name === "find" ) ret.selector = this.selector + (this.selector ? " " : "") + selector;
+						else if ( name )       ret.selector = this.selector + "." + name + "(" + selector + ")";
 					
-					// Return the newly-formed element set
-					return ret;
-				}
+						// Return the newly-formed element set
+						return ret;
+					};
 				
-				// Copy static functions through from $ to this.$ so e.g. $.ajax still works
-				// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
-				$.extend(this.$, $);
+					// Copy static functions through from $ to this.$ so e.g. $.ajax still works
+					// @bug, @cantfix: Any class functions added to $ after this call won't get mirrored through 
+					$.extend(this.$, $);
+				}
 				
 				// We override entwine to inject the name of this namespace when defining blocks inside this namespace
 				var entwine_wrapper = this.injectee.entwine = function(spacename) {
@@ -899,11 +921,11 @@ var console;
 					else if (spacename.charAt(0) != '.') args[0] = name+'.'+spacename;
 					
 					return $.fn.entwine.apply(this, args);
-				}
+				};
 				
 				this.$.entwine = function() {
 					entwine_wrapper.apply(null, arguments);
-				}
+				};
 				
 				for (var i = 0; i < handlers.length; i++) {
 					var handler = handlers[i], builder;
@@ -947,7 +969,7 @@ var console;
 				}
 				// If we didn't find a entwine-defined function, but there is a non-entwine function to use as a base, try that
 				if (basefunc) return basefunc.apply(namespace.$(el), args);
-			}
+			};
 			
 			return one;
 		},
@@ -977,12 +999,12 @@ var console;
 			
 			var rule = rulelist.addRule(selector, name); rule.func = func;
 			
-			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].entwine) {
+			if (!this.injectee.hasOwnProperty(name) || !this.injectee[name].isentwinemethod) {
 				this.injectee[name] = this.build_proxy(name, this.injectee.hasOwnProperty(name) ? this.injectee[name] : null);
-				this.injectee[name].entwine = true;
+				this.injectee[name].isentwinemethod = true;
 			}
 
-			if (!this.injectee[name].entwine) {
+			if (!this.injectee[name].isentwinemethod) {
 				$.entwine.warn('Warning: Entwine function '+name+' clashes with regular jQuery function - entwine function will not be callable directly on jQuery object', $.entwine.WARN_LEVEL_IMPORTANT);
 			}
 		},
@@ -1018,7 +1040,7 @@ var console;
 	$.entwine.Namespace.addHandler = function(handler) {
 		for (var i = 0; i < handlers.length && handlers[i].order < handler.order; i++) { /* Pass */ }
 		handlers.splice(i, 0, handler);
-	}
+	};
 	
 	$.entwine.Namespace.addHandler({
 		order: 50,
@@ -1106,7 +1128,7 @@ var console;
 	var triggerEvent = function() {
 		$(document).triggerHandler('DOMMaybeChanged');
 		check_id = null;
-	}
+	};
 	
 	$.extend($.entwine, {
 		/**
@@ -1116,7 +1138,7 @@ var console;
 		 */
 		synchronous_mode: function() {
 			if (check_id) clearTimeout(check_id); check_id = null;
-			runSoon = function(func, delay){ func.call(this); return null; }
+			runSoon = function(func, delay){ func.call(this); return null; };
 		},
 		
 		/**
@@ -1135,8 +1157,8 @@ var console;
 				var rv = old.apply(this, arguments);
 				if (!check_id) check_id = runSoon(triggerEvent, 100);
 				return rv;
-			}
-		})
+			};
+		});
 	}
 	
 	function registerSetterGetterFunction() {
@@ -1146,8 +1168,8 @@ var console;
 				var rv = old.apply(this, arguments);
 				if (!check_id && (b !== undefined || typeof a != 'string')) check_id = runSoon(triggerEvent, 100);
 				return rv;
-			}
-		})
+			};
+		});
 	}
 
 	// Register core DOM manipulation methods
@@ -1155,7 +1177,7 @@ var console;
 	registerSetterGetterFunction('attr');
 	
 	// And on DOM ready, trigger matching once
-	$(function(){ triggerEvent(); })
+	$(function(){ triggerEvent(); });
 	
 })(jQuery);;
 
@@ -1172,12 +1194,12 @@ var console;
 	if (document.compareDocumentPosition) {
 		var is_or_contains = function(a, b) {
 			return a && b && (a == b || !!(a.compareDocumentPosition(b) & 16));
-		}
+		};
 	}
 	else {
 		var is_or_contains = function(a, b) {
 			return a && b && (a == b || (a.contains ? a.contains(b) : true));
-		}
+		};
 	}
 
 	/* Add the methods to handle event binding to the Namespace class */
@@ -1329,7 +1351,7 @@ var console;
 	var delegate_submit = function(e, data){ 
 		var delegationEvent = $.Event('delegatedSubmit'); delegationEvent.delegatedEvent = e;
 		return $(document).trigger(delegationEvent, data); 
-	}
+	};
 
 	$(document).bind('DOMMaybeChanged', function(){
 		var forms = $('form');
@@ -1380,7 +1402,7 @@ var console;
 						catch(e) { $.entwine.warn_exception(name, el, e); } 
 						finally  { el.i = tmp_i; el.f = tmp_f; }					
 					}
-				}
+				};
 				
 				ctors[name+'proxy'] = proxy;
 			}
@@ -1416,7 +1438,7 @@ var console;
 			if (ctors) {
 			
 				// Keep a record of elements that have matched already
-				var matched = $([]), add, rem, res, rule, ctor, dtor;
+				var matched = $([]), add, rem, res, rule, sel, ctor, dtor;
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
@@ -1451,7 +1473,7 @@ var console;
 				}
 			}
 		}
-	})
+	});
 	
 
 })(jQuery);
@@ -1466,11 +1488,11 @@ var console;
 	
 	var getEntwineData = function(el, namespace, property) {
 		return el.data(entwine_prepend + namespace + '!' + property);
-	}
+	};
 	
 	var setEntwineData = function(el, namespace, property, value) {
 		return el.data(entwine_prepend + namespace + '!' + property, value);
-	}
+	};
 	
 	var getEntwineDataAsHash = function(el, namespace) {
 		var hash = {};
@@ -1485,11 +1507,11 @@ var console;
 		}
 		
 		return hash;
-	}
+	};
 	
 	var setEntwineDataFromHash = function(el, namespace, hash) {
 		for (var k in hash) setEntwineData(namespace, k, hash[k]);
-	}
+	};
 
 	var entwineData = function(el, namespace, args) {
 		switch (args.length) {
@@ -1501,7 +1523,7 @@ var console;
 			default:
 				return setEntwineData(el, namespace, args[0], args[1]);
 		}
-	}
+	};
  
 	$.extend($.fn, {
 		entwineData: function() {
