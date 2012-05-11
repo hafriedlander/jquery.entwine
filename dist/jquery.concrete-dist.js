@@ -694,6 +694,69 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 ;
 
 
+/* src/jquery.selector.affectedby.js */
+
+(function($) {
+
+	// TODO:
+	// Make attributes & IDs work
+
+	var DIRECT = /DIRECT/g;
+	var CONTEXT = /CONTEXT/g;
+	var EITHER = /DIRECT|CONTEXT/g;
+
+	$.selector.SelectorBase.addMethod('affectedBy', function(props) {
+		this.affectedBy = new Function('props', ([
+			'var direct_classes, context_classes, direct_attrs, context_attrs, t;',
+			this.ABC_compile().replace(DIRECT, 'direct').replace(CONTEXT, 'context'),
+			'return {classes: {context: context_classes, direct: direct_classes}, attrs: {context: context_attrs, direct: direct_attrs}};'
+		]).join("\n"));
+
+		// DEBUG: Print out the compiled funciton
+		// console.log(this.selector, ''+this.affectedBy);
+
+		return this.affectedBy(props);
+	});
+
+	$.selector.SimpleSelector.addMethod('ABC_compile', function() {
+		var parts = [];
+
+		$.each(this.classes, function(i, cls){
+			parts[parts.length] = "if (t = props.classes['"+cls+"']) (DIRECT_classes || (DIRECT_classes = {}))['"+cls+"'] = t;";
+		});
+
+		$.each(this.nots, function(i, not){
+			parts[parts.length] = not.ABC_compile();
+		});
+
+		return parts.join("\n");
+	});
+
+	$.selector.Selector.addMethod('ABC_compile', function(arg){
+		var parts = [];
+		var i = this.parts.length-1;
+
+		parts[parts.length] = this.parts[i].ABC_compile();
+		while ((i = i - 2) >= 0) parts[parts.length] = this.parts[i].ABC_compile().replace(EITHER, 'CONTEXT');
+
+		return parts.join("\n");
+	});
+
+	$.selector.SelectorsGroup.addMethod('ABC_compile', function(){
+		var parts = [];
+
+		$.each(this.parts, function(i,part){
+			parts[parts.length] = part.ABC_compile();
+		});
+
+		return parts.join("\n");
+	});
+
+
+})(jQuery);
+;
+
+
 /* src/jquery.focusinout.js */
 
 (function($){	
@@ -1122,19 +1185,140 @@ catch (e) {
 /* src/jquery.entwine.dommaybechanged.js */
 
 (function($){
-	
+
+	/** Utility function to monkey-patch a jQuery method */
+	var monkey = function( /* method, method, ...., patch */){
+		var methods = $.makeArray(arguments);
+		var patch = methods.pop();
+
+		$.each(methods, function(i, method){
+			var old = $.fn[method];
+
+			$.fn[method] = function() {
+				var self = this, args = $.makeArray(arguments);
+
+				var rv = old.apply(self, args);
+				patch.apply(self, args);
+				return rv;
+			}
+		});
+	}
+
 	/** What to call to run a function 'soon'. Normally setTimeout, but for syncronous mode we override so soon === now */
 	var runSoon = window.setTimeout;
 	
 	/** The timer handle for the asyncronous matching call */
-	var check_id = null; 
-	
-	/** Fire the change event. Only fires on the document node, so bind to that */
-	var triggerEvent = function() {
-		$(document).triggerHandler('DOMMaybeChanged');
-		check_id = null;
-	};
-	
+	var ChangeDetails = Base.extend({
+
+		init: function() {
+			this.global = false;
+			this.attrs = {};
+			this.classes = {};
+		},
+
+		/** Fire the change event. Only fires on the document node, so bind to that */
+		triggerEvent: function() {
+			// If we're not the active changes instance any more, don't trigger
+			if (changes != this) return;
+
+			// Cancel any pending timeout (if we're directly called in the mean time)
+			if (this.check_id) clearTimeout(this.check_id);
+
+			// Create a new event object
+			var event = $.Event("DOMMaybeChanged");
+			event.changes = this;
+
+			// Reset the global changes object to be a new instance (do before trigger, in case trigger fires changes itself)
+			changes = new ChangeDetails();
+
+			// Fire event
+			$(document).triggerHandler(event);
+		},
+
+		changed: function() {
+			if (!this.check_id) {
+				var self = this;
+				this.check_id = runSoon(function(){ self.check_id = null; self.triggerEvent(); }, 10);
+			}
+		},
+
+		addAll: function() {
+			if (this.global) return this; // If we've already flagged as a global change, just skip
+
+			this.global = true;
+			this.changed();
+			return this;
+		},
+
+		addSubtree: function(node) {
+			return this.addAll();
+		},
+
+		/* For now we don't do this. It's expensive, and jquery.entwine.ctors doesn't use this information anyway */
+		addSubtreeFuture: function(node) {
+			if (this.global) return this; // If we've already flagged as a global change, just skip
+
+			this.subtree = this.subtree ? this.subtree.add(node) : $(node);
+			this.changed();
+			return this;
+		},
+
+		addAttr: function(attr, node) {
+			if (this.global) return this;
+
+			this.attrs[attr] = (attr in this.attrs) ? this.attrs[attr].add(node) : $(node);
+			this.changed();
+			return this;
+		},
+
+		addClass: function(klass, node) {
+			if (this.global) return this;
+
+			this.classes[klass] = (klass in this.classes) ? this.classes[klass].add(node) : $(node);
+			this.changed();
+			return this;
+		}
+	});
+
+	var changes = new ChangeDetails();
+
+
+	monkey('append', 'prepend', 'empty', 'html', function(){
+		changes.addSubtree(this);
+	});
+
+	monkey('after', 'before', 'remove', 'detach', function(){
+		changes.addSubtree(this.parent());
+	})
+
+	monkey('removeAttr', function(attr){
+		changes.addAttr(attr, this);
+	});
+
+	monkey('addClass', 'removeClass', 'toggleClass', function(klass){
+		if (typeof klass == 'string') changes.addClass(klass, this);
+	});
+
+	monkey('attr', function(a, b){
+		if (b !== undefined && typeof a == 'string') changes.addAttr(a, this);
+		else if (typeof a != 'string') { for (var k in a) changes.addAttr(k, this); }
+	});
+
+	/*
+	These manipulation functions call one or more of the above to do the actual manipulation:
+	appendTo -> append
+	prependTo -> prepend
+	insertBefore -> before
+	insertAfter -> after
+	replaceWith -> before || append
+	replaceAll -> replaceWith
+	text -> empty, appendWith
+	wrapAll -> insertBefore, append
+	wrapInner -> wrapAll || append
+	wrap -> wrapAll
+	unwrap -> replaceWith
+	*/
+
 	$.extend($.entwine, {
 		/**
 		 * Make onmatch and onunmatch work in synchronous mode - that is, new elements will be detected immediately after
@@ -1142,48 +1326,26 @@ catch (e) {
 		 * (otherwise we'd make it the default).
 		 */
 		synchronous_mode: function() {
-			if (check_id) clearTimeout(check_id); check_id = null;
+			if (changes && changes.check_id) clearTimeout(changes.check_id);
+			changes = new ChangeDetails();
+
 			runSoon = function(func, delay){ func.call(this); return null; };
 		},
-		
+
 		/**
 		 * Trigger onmatch and onunmatch now - usefull for after DOM manipulation by methods other than through jQuery.
 		 * Called automatically on document.ready
 		 */
 		triggerMatching: function() {
-			matching();
+			changes.addAll(); //.triggerEvent();
 		}
 	});
-	
-	function registerMutateFunction() {
-		$.each(arguments, function(i,func){
-			var old = $.fn[func];
-			$.fn[func] = function() {
-				var rv = old.apply(this, arguments);
-				if (!check_id) check_id = runSoon(triggerEvent, 100);
-				return rv;
-			};
-		});
-	}
-	
-	function registerSetterGetterFunction() {
-		$.each(arguments, function(i,func){
-			var old = $.fn[func];
-			$.fn[func] = function(a, b) {
-				var rv = old.apply(this, arguments);
-				if (!check_id && (b !== undefined || typeof a != 'string')) check_id = runSoon(triggerEvent, 100);
-				return rv;
-			};
-		});
-	}
 
-	// Register core DOM manipulation methods
-	registerMutateFunction('append', 'prepend', 'after', 'before', 'wrap', 'removeAttr', 'addClass', 'removeClass', 'toggleClass', 'empty', 'remove');
-	registerSetterGetterFunction('attr');
-	
 	// And on DOM ready, trigger matching once
-	$(function(){ triggerEvent(); });
-	
+	$(function(){
+		$.entwine.triggerMatching();
+	});
+
 })(jQuery);;
 
 
@@ -1491,6 +1653,9 @@ catch (e) {
 		
 		bind: function(selector, k, v) {
 			if ($.isFunction(v) && (k == 'onmatch' || k == 'onunmatch')) {
+				// When we add new matchers we need to trigger a full global recalc once, regardless of the DOM changes that triggered the event
+				this.matchersDirty = true;
+
 				this.bind_condesc(selector, k, v);
 				return true;
 			}
@@ -1507,15 +1672,39 @@ catch (e) {
 	 *   $('#foo').addClass('tabs'); $('#foo').tabFunctionBar();
 	 * won't work.
 	 */
-	$(document).bind('DOMMaybeChanged', function(){
+	$(document).bind('DOMMaybeChanged', function(e){
+		// Get the change delta. Can help stop us from doing heavy lifting if none of the changes could actually trigger an onmatch or onunmatch function
+		var changes = e.changes;
+
+		// var start = (new Date).getTime();
+
 		// For every namespace
 		for (var k in $.entwine.namespaces) {
+			var namespace = $.entwine.namespaces[k];
+
 			// That has constructors or destructors
-			var ctors = $.entwine.namespaces[k].store.ctors;
+			var ctors = namespace.store.ctors;
 			if (ctors) {
 			
-				// Keep a record of elements that have matched already
-				var matched = $([]), add, rem, res, rule, sel, ctor, dtor;
+				// Keep a record of elements that have matched some previous more specific rule.
+				// Not that we _don't_ actually do that until this is needed. If matched is null, it's not been calculated yet.
+				// We also keep track of any elements that have newly been taken or released by a specific rule
+				var matched = null, taken = $([]), released = $([]);
+
+				// Updates matched to contain all the previously matched elements as if we'd been keeping track all along
+				var calcmatched = function(j){
+					if (matched !== null) return;
+					matched = $([]);
+
+					var cache, k = ctors.length;
+					while ((--k) > j) {
+						if (cache = ctors[k].cache) matched = matched.add(cache);
+					}
+				}
+
+				// Some declared variables used in the loop
+				var add, rem, res, rule, sel, ctor, dtor, full;
+
 				// Stepping through each selector from most to least specific
 				var j = ctors.length;
 				while (j--) {
@@ -1524,40 +1713,140 @@ catch (e) {
 					sel = rule.selector.selector;
 					ctor = rule.onmatch; 
 					dtor = rule.onunmatch;
-					
-					// Get the list of elements that match this selector, that haven't yet matched a more specific selector
-					res = add = $(sel).not(matched);
-					
-					// If this selector has a list of elements it matched against last time
-					if (rule.cache) {
-						// Find the ones that are extra this time
-						add = res.not(rule.cache);
-						if (dtor) {
-							// Find the ones that are gone this time
-							rem = rule.cache.not(res);
-							// And call the destructor on them
-							if (rem.length && !rule.onunmatchRunning) {
-								rule.onunmatchRunning = true;
-								ctors.onunmatchproxy(rem, j, dtor);
-								rule.onunmatchRunning = false;
+
+					/*
+						Rule.cache might be stale or fresh. It'll be stale if
+					   - some more specific selector now has some of rule.cache in it
+						- some change has happened that means new elements match this selector now
+						- some change has happened that means elements no longer match this selector
+
+						The first we can just compare rules.cache with matched, removing anything that's there already.
+					*/
+
+					// Reset the "elements that match this selector and no more specific selector with an onmatch rule" to null.
+					// Staying null means this selector is fresh.
+					res = null;
+
+					// If this gets changed to true, it's too hard to do a delta update, so do a full update
+					full = false;
+
+					if (namespace.matchersDirty || changes.global) {
+						// For now, just fall back to old version. We need to do something like changed.Subtree.find('*').andSelf().filter(sel), but that's _way_ slower on modern browsers than the below
+						full = true;
+					}
+					else {
+						// We don't deal with attributes yet, so any attribute change means we need to do a full recalc
+						for (var k in e.changes.attrs) {	full = true; break; }
+
+						/*
+						 If a class changes, but it isn't listed in our selector, we don't care - the change couldn't affect whether or not any element matches
+
+						 If it is listed on our selector
+							- If it is on the direct match part, it could have added or removed the node it changed on
+							- If it is on the context part, it could have added or removed any node that were previously included or excluded because of a match or failure to match with the context required on that node
+							- NOTE: It might be on _both_
+						 */
+
+						var method = rule.selector.affectedBy(e.changes);
+
+						if (method.classes.context) {
+							full = true;
+						}
+						else {
+							for (var k in method.classes.direct) {
+								calcmatched(j);
+								var recheck = e.changes.classes[k].not(matched);
+
+								if (res === null) {
+									res = rule.cache ? rule.cache.not(taken).add(released.filter(sel)) : $([]);
+								}
+
+								res = res.not(recheck).add(recheck.filter(sel));
 							}
 						}
 					}
-					
-					// Call the constructor on the newly matched ones
-					if (add.length && ctor && !rule.onmatchRunning) {
-						rule.onmatchRunning = true;
-						ctors.onmatchproxy(add, j, ctor);
-						rule.onmatchRunning = false;
+
+					if (full) {
+						calcmatched(j);
+						res = $(sel).not(matched);
 					}
-					
-					// Add these matched ones to the list tracking all elements matched so far
-					matched = matched.add(res);
-					// And remember this list of matching elements again this selector, so next matching we can find the unmatched ones
-					ctors[j].cache = res;
+					else {
+						if (!res) {
+							// We weren't stale because of any changes to the DOM that affected this selector, but more specific
+							// onmatches might have caused stale-ness
+
+							// Do any of the previous released elements match this selector?
+							add = released.length && released.filter(sel);
+
+							if (add && add.length) {
+								// Yes, so we're stale as we need to include them. Filter for any possible taken value at the same time
+								res = rule.cache ? rule.cache.not(taken).add(add) : add;
+							}
+							else {
+								// Do we think we own any of the elements now taken by more specific rules?
+								rem = taken.length && rule.cache && rule.cache.filter(taken);
+
+								if (rem && rem.length) {
+									// Yes, so we're stale as we need to exclude them.
+									res = rule.cache.not(rem);
+								}
+							}
+						}
+					}
+
+					// Res will be null if we know we are fresh (no full needed, selector not affectedBy changes)
+					if (res === null) {
+						// If we are tracking matched, add ourselves
+						if (matched && rule.cache) matched = matched.add(rule.cache);
+					}
+					else {
+						// If this selector has a list of elements it matched against last time
+						if (rule.cache) {
+							// Find the ones that are extra this time
+							add = res.not(rule.cache);
+							rem = rule.cache.not(res);
+						}
+						else {
+							add = res; rem = null;
+						}
+
+						if ((add && add.length) || (rem && rem.length)) {
+							if (rem && rem.length) {
+								released = released.add(rem);
+
+								if (dtor && !rule.onunmatchRunning) {
+									rule.onunmatchRunning = true;
+									ctors.onunmatchproxy(rem, j, dtor);
+									rule.onunmatchRunning = false;
+								}
+							}
+
+							// Call the constructor on the newly matched ones
+							if (add && add.length) {
+								taken = taken.add(add);
+								released = released.not(add);
+
+								if (ctor && !rule.onmatchRunning) {
+									rule.onmatchRunning = true;
+									ctors.onmatchproxy(add, j, ctor);
+									rule.onmatchRunning = false;
+								}
+							}
+						}
+
+						// If we are tracking matched, add ourselves
+						if (matched) matched = matched.add(res);
+
+						// And remember this list of matching elements again this selector, so next matching we can find the unmatched ones
+						rule.cache = res;
+					}
 				}
+
+				namespace.matchersDirty = false;
 			}
 		}
+
+		// console.log((new Date).getTime() - start);
 	});
 	
 

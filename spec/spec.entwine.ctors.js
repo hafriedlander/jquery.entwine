@@ -103,5 +103,45 @@ describe('Entwine', function(){
 			expect([a, b, c, d]).toEqual([2, 2, 1, 1]);
 		});
 
+		it('handles onmatch rules being added post document.onready', function(){
+			var a = 0, b = 0;
+
+			$('#a').entwine({
+				onmatch: function(){a += 1;}
+			});
+			$('#a.a').entwine({
+				onmatch: function(){b += 1;}
+			});
+
+			// Rules are new, and no DOM change, so no triggers yet
+			expect([a, b]).toEqual([0, 0]);
+
+			// New #a.a rule thinks it matches no nodes, and so removing .a would normally not release it. Check we handle
+			$('#a').removeClass('a');
+			expect([a, b]).toEqual([1, 0]);
+		});
+
+		it('calls onmatch in less specific rule when more specific rule no longer matches', function(){
+			var a = 0, b = 0, c = 0;
+
+			$('#a').entwine({
+				onmatch: function(){a += 1;}
+			});
+			$('#a.a').entwine({
+				onmatch: function(){b += 1;}
+			});
+			$('#a.a.b').entwine({
+				onmatch: function(){c += 1;}
+			});
+
+			$.entwine.triggerMatching();
+			expect([a, b, c]).toEqual([0, 0, 1]);
+
+			$('#a').removeClass('b');
+			expect([a, b, c]).toEqual([0, 1, 1]);
+
+			$('#a').removeClass('a');
+			expect([a, b, c]).toEqual([1, 1, 1]);
+		});
 	});
 });
