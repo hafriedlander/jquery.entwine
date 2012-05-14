@@ -172,7 +172,7 @@ jQuery(function($){
 			});
 		};
 
-		$.each($(e.target).parents('.ei-entwined').andSelf(), displayelement);
+		$.each($(e.target).parents().andSelf().filter('.ei-entwined'), displayelement);
 		$('#ei-elements > ul:first > li:first').click();
 	}
 
