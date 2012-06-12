@@ -32,7 +32,8 @@ catch (e) {
 			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
 			$(document).unbind('.entwine');
 			// Remove namespaces, and start over again
-			namespaces = $.entwine.namespaces = {};
+			for (var k in namespaces) delete namespaces[k];
+			for (var k in $.entwine.capture_bindings) delete $.entwine.capture_bindings[k];
 		},
 		
 		WARN_LEVEL_NONE: 0,
@@ -183,7 +184,7 @@ catch (e) {
 				
 				for (var i = 0; i < handlers.length; i++) {
 					var handler = handlers[i], builder;
-					
+
 					// Inject jQuery object method overrides
 					if (builder = handler.namespaceMethodOverrides) {
 						var overrides = builder(this);

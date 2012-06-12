@@ -20,6 +20,7 @@ for x in \
 	src/jquery.entwine.events.js \
 	src/jquery.entwine.ctors.js \
 	src/jquery.entwine.addrem.js \
+	src/jquery.entwine.eventcapture.js \
 	src/jquery.entwine.properties.js \
 	src/jquery.entwine.legacy.js
 do \
