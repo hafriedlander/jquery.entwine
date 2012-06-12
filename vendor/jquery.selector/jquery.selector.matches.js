@@ -123,7 +123,13 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 			this.wsattrs[attr] = true;
 			return join([this.uses_attr(attr), 'var _WS_'+varForAttr(attr)+' = " "+'+varForAttr(attr)+'+" ";']); 
 		},
-		
+
+		uses_jqueryFilters: function() {
+			if (this.jqueryFiltersAdded) return;
+			this.jqueryFiltersAdded = true;
+			return 'var _$filters = jQuery.find.selectors.filters;';
+		},
+
 		save: function(lbl) {
 			return 'var el'+lbl+' = el;';
 		},
@@ -235,7 +241,8 @@ Sizzle is good for finding elements for a selector, but not so good for telling 
 				js[js.length] = ( typeof check == 'function' ? check.apply(this, pscls[1]) : check );
 			}
 			else if (check = $.find.selectors.filters[pscls[0]]) {
-				js[js.length] = 'if (!$.find.selectors.filters.'+pscls[0]+'(el)) BAD;';
+				js[js.length] = el.uses_jqueryFilters();
+				js[js.length] = 'if (!_$filters.'+pscls[0]+'(el)) BAD;';
 			}
 		});
 		
