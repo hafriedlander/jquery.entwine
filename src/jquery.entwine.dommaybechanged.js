@@ -38,15 +38,11 @@
 			// Cancel any pending timeout (if we're directly called in the mean time)
 			if (this.check_id) clearTimeout(this.check_id);
 
-			// Create a new event object
-			var event = $.Event("DOMMaybeChanged");
-			event.changes = this;
-
 			// Reset the global changes object to be a new instance (do before trigger, in case trigger fires changes itself)
 			changes = new ChangeDetails();
 
 			// Fire event
-			$(document).triggerHandler(event);
+			$(document).triggerHandler("DOMMaybeChanged", [this]);
 		},
 
 		changed: function() {

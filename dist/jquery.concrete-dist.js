@@ -1212,15 +1212,11 @@ catch (e) {
 			// Cancel any pending timeout (if we're directly called in the mean time)
 			if (this.check_id) clearTimeout(this.check_id);
 
-			// Create a new event object
-			var event = $.Event("DOMMaybeChanged");
-			event.changes = this;
-
 			// Reset the global changes object to be a new instance (do before trigger, in case trigger fires changes itself)
 			changes = new ChangeDetails();
 
 			// Fire event
-			$(document).triggerHandler(event);
+			$(document).triggerHandler("DOMMaybeChanged", [this]);
 		},
 
 		changed: function() {
@@ -1660,10 +1656,7 @@ catch (e) {
 	 *   $('#foo').addClass('tabs'); $('#foo').tabFunctionBar();
 	 * won't work.
 	 */
-	$(document).bind('DOMMaybeChanged', function(e){
-		// Get the change delta. Can help stop us from doing heavy lifting if none of the changes could actually trigger an onmatch or onunmatch function
-		var changes = e.changes;
-
+	$(document).bind('DOMMaybeChanged', function(e, changes){
 		// var start = (new Date).getTime();
 
 		// For every namespace
@@ -1724,7 +1717,7 @@ catch (e) {
 					}
 					else {
 						// We don't deal with attributes yet, so any attribute change means we need to do a full recalc
-						for (var k in e.changes.attrs) {	full = true; break; }
+						for (var k in changes.attrs) {	full = true; break; }
 
 						/*
 						 If a class changes, but it isn't listed in our selector, we don't care - the change couldn't affect whether or not any element matches
@@ -1735,7 +1728,7 @@ catch (e) {
 							- NOTE: It might be on _both_
 						 */
 
-						var method = rule.selector.affectedBy(e.changes);
+						var method = rule.selector.affectedBy(changes);
 
 						if (method.classes.context) {
 							full = true;
@@ -1743,7 +1736,7 @@ catch (e) {
 						else {
 							for (var k in method.classes.direct) {
 								calcmatched(j);
-								var recheck = e.changes.classes[k].not(matched);
+								var recheck = changes.classes[k].not(matched);
 
 								if (res === null) {
 									res = rule.cache ? rule.cache.not(taken).add(released.filter(sel)) : $([]);
