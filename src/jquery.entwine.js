@@ -31,6 +31,7 @@ catch (e) {
 			for (var k in $.fn) { if ($.fn[k].isentwinemethod) delete $.fn[k]; }
 			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
 			$(document).unbind('.entwine');
+			$(window).unbind('.entwine');
 			// Remove namespaces, and start over again
 			for (var k in namespaces) delete namespaces[k];
 			for (var k in $.entwine.capture_bindings) delete $.entwine.capture_bindings[k];

@@ -16,11 +16,53 @@ describe('Entwine', function(){
 			$('#dom_test').html('<div id="a" class="a b c"><div id="d" class="d e f"></div></div>');
 		});
 
-		it('can capture by selector', function(){
+		it('can capture by direct selector', function(){
+			var triggers = [];
+
+			$('#d').entwine({
+				'from#a': {
+					onsynthetic: function(){ triggers.push(this.attr('id')); }
+				}
+			});
+
+			$('#a').trigger('synthetic');
+			expect(triggers).toEqual(['d'])
+
+			$('#a').trigger('synthetic');
+			expect(triggers).toEqual(['d', 'd']);
+
+			$('#dom_test').trigger('synthetic');
+			expect(triggers).toEqual(['d', 'd']);
+		});
+
+		it('can capture by indirect selector', function(){
 			var triggercount = 0;
 
 			$('#d').entwine({
-				onsynthetic_from: $.entwine.capture('#a', function(){ triggercount += 1;})
+				A: '#a',
+				fromA: {
+					onsynthetic: function(){ triggercount += 1;}
+				}
+			});
+
+			$('#a').trigger('synthetic');
+			expect(triggercount).toEqual(1);
+
+			$('#a').trigger('synthetic');
+			expect(triggercount).toEqual(2);
+
+			$('#dom_test').trigger('synthetic');
+			expect(triggercount).toEqual(2);
+		});
+
+		it('can capture by returning element set', function(){
+			var triggercount = 0;
+
+			$('#d').entwine({
+				getA: function(){ return this.parent(); },
+				fromA: {
+					onsynthetic: function(){ triggercount += 1;}
+				}
 			});
 
 			$('#a').trigger('synthetic');
@@ -37,10 +79,14 @@ describe('Entwine', function(){
 			var triggerlist = [];
 
 			$('.d').entwine({
-				onsynthetic_from: $.entwine.capture('#a', function(){ triggerlist.push(1); })
+				'from#a': {
+					onsynthetic: function(){ triggerlist.push(1); }
+				}
 			});
 			$('#d').entwine({
-				onsynthetic_from: $.entwine.capture('#a', function(){ triggerlist.push(2); })
+				'from#a': {
+					onsynthetic: function(){ triggerlist.push(2); }
+				}
 			});
 
 			$('#a').trigger('synthetic');
@@ -51,7 +97,9 @@ describe('Entwine', function(){
 			var a, b;
 
 			$('#d').entwine({
-				onsynthetic_from: $.entwine.capture('#a', function(e, data){ a = e.passthrough; b = data; })
+				'from#a': {
+					onsynthetic: function(e, data){ a = e.passthrough; b = data; }
+				}
 			});
 
 			var e = $.Event('synthetic'); e.passthrough = 'foo';
@@ -65,12 +113,29 @@ describe('Entwine', function(){
 			var triggercount = 0;
 
 			$('#d').entwine({
-				onsynthetic_from_a: $.entwine.capture('#a', function(){ triggercount += 1;}),
-				onsynthetic_from_b: $.entwine.capture('.a', function(){ triggercount += 1;})
+				'from#a': {
+					onsynthetic: function(){ triggercount += 1;}
+				},
+				'from.b': {
+					onsynthetic: function(){ triggercount += 1;}
+				}
 			});
 
 			$('#a').trigger('synthetic');
 			expect(triggercount).toEqual(2);
+		});
+
+		it('can capture from window', function(){
+			var triggercount = 0;
+
+			$('#d').entwine({
+				fromWindow: {
+					onsynthetic: function(){ triggercount += 1;}
+				}
+			});
+
+			$(window).trigger('synthetic');
+			expect(triggercount).toEqual(1);
 		});
 	});
 });

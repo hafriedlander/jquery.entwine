@@ -833,6 +833,7 @@ catch (e) {
 			for (var k in $.fn) { if ($.fn[k].isentwinemethod) delete $.fn[k]; }
 			// Remove bound events - TODO: Make this pluggable, so this code can be moved to jquery.entwine.events.js
 			$(document).unbind('.entwine');
+			$(window).unbind('.entwine');
 			// Remove namespaces, and start over again
 			for (var k in namespaces) delete namespaces[k];
 			for (var k in $.entwine.capture_bindings) delete $.entwine.capture_bindings[k];
@@ -2014,36 +2015,6 @@ catch (e) {
 		}
 	};
 
-	$.entwine.Namespace.addHandler({
-		order: 10,
-
-		bind: function(selector, k, v) {
-			if (v && $.isFunction(v) && v._iscapture) {
-				var match = k.match(/^on(.*)_from/);
-				var event = match && match[1];
-
-				if (!event) {
-					$.entwine.warn('To capture an event, the method name needs to start on{event}_from - got '+k+' so ignoring', $.entwine.WARN_LEVEL_IMPORTANT);
-				}
-				else {
-					this.bind_capture(selector, event, k, v);
-
-					if (!bindings[event]) {
-						$(document).bind(event.replace(/(\s+|$)/g, '.entwine$1'), bindings[event] = event_proxy(event));
-					}
-				}
-
-				return true;
-			}
-		},
-
-		namespaceStaticOverrides: function(namespace){
-			return {
-				capture: $.entwine.capture
-			};
-		}
-	});
-
 	var selector_proxy = function(selector, handler, includechildren) {
 		var matcher = $.selector(selector);
 		return function(e){
@@ -2051,33 +2022,58 @@ catch (e) {
 		}
 	};
 
-	var element_proxy = function(elements, handler, includechildren) {
-		var elements = $(elements);
+	var window_proxy = function(selector, handler, includechildren) {
 		return function(e){
-			if (elements.filter(e.target).length) return handler.apply(this, arguments);
+			if (e.target === window) return handler.apply(this, arguments);
 		}
 	};
 
-	var function_proxy = function(callback, handler, includechildren) {
+	var property_proxy = function(property, handler, includechildren) {
+		var matcher;
+
 		return function(e){
-			if ($(callback.call(this)).filter(e.target).length) return handler.apply(this, arguments);
+			var match = this['get'+property]();
+
+			if (typeof(match) == 'string') {
+				var matcher = (matcher && match == matcher.selector) ? matcher : $.selector(match);
+				if (matcher.matches(e.target)) return handler.apply(this, arguments);
+			}
+			else {
+				if ($.inArray(e.target, match) !== -1) return handler.apply(this, arguments);
+			}
 		}
 	};
 
-	$.extend($.entwine, {
-		capture: function(source, handler, includechildren){
-			var proxyGen;
+	$.entwine.Namespace.addHandler({
+		order: 10,
 
-			// If source is a string, it's a selector
-			if (typeof(source) == 'string') proxyGen = selector_proxy;
-			// If source is a function, it's called to get the actual element, once per object
-			else if ($.isFunction(source)) proxyGen = function_proxy;
-			// Default is to assume source is a jQuery object or something that can be turned into one (DOM element, array of elements, etc)
-			else proxyGen = element_proxy;
+		bind: function(selector, k, v) {
+			var match;
+			if ($.isPlainObject(v) && (match = k.match(/^from\s*(.*)/))) {
+				var from = match[1];
+				var proxyGen;
 
-			var proxy = proxyGen(source, handler, includechildren);
-			proxy._iscapture = true;
-			return proxy;
+				if (from.match(/[^\w]/)) proxyGen = selector_proxy;
+				else if (from == 'Window' || from == 'window') proxyGen = window_proxy;
+				else proxyGen = property_proxy;
+
+				for (var onevent in v) {
+					var handler = v[onevent];
+					match = onevent.match(/^on(.*)/);
+					var event = match[1];
+
+					this.bind_capture(selector, event, k + '_' + event, proxyGen(from, handler));
+
+					if (!bindings[event]) {
+						var namespaced = event.replace(/(\s+|$)/g, '.entwine$1');
+						bindings[event] = event_proxy(event);
+
+						$(proxyGen == window_proxy ? window : document).bind(namespaced, bindings[event]);
+					}
+				}
+
+				return true;
+			}
 		}
 	});
 
