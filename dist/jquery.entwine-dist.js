@@ -1580,7 +1580,9 @@ catch (e) {
 	$(document).bind('DOMMaybeChanged', function(){
 		var forms = $('form');
 		// Only bind to forms we haven't processed yet
-		forms.not(form_binding_cache).bind('submit', delegate_submit);
+		forms.not(form_binding_cache).bind('submit.entwine_delegate_submit', delegate_submit);
+		// Unbind gone forms
+		form_binding_cache.not(forms).unbind('.entwine_delegate_submit');
 		// Then remember the current set of forms
 		form_binding_cache = forms;
 	});
