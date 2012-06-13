@@ -64,7 +64,7 @@
 	 *   $('#foo').addClass('tabs'); $('#foo').tabFunctionBar();
 	 * won't work.
 	 */
-	$(document).bind('DOMMaybeChanged', function(e, changes){
+	$(document).bind('EntwineSubtreeMaybeChanged', function(e, changes){
 		// var start = (new Date).getTime();
 
 		// For every namespace

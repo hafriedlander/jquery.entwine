@@ -42,7 +42,7 @@
 			changes = new ChangeDetails();
 
 			// Fire event
-			$(document).triggerHandler("DOMMaybeChanged", [this]);
+			$(document).triggerHandler("EntwineSubtreeMaybeChanged", [this]);
 		},
 
 		changed: function() {
@@ -92,14 +92,22 @@
 
 	var changes = new ChangeDetails();
 
+	// Element add events trigger maybechanged events
 
-	monkey('append', 'prepend', 'empty', 'html', function(){
-		changes.addSubtree(this);
+	$(document).bind('EntwineElementsAdded', function(e){ changes.addSubtree(e.targets); });
+
+	// Element remove events trigger maybechanged events, but we have to wait until after the nodes are actually removed
+	// (EntwineElementsRemoved fires _just before_ the elements are removed so the data still exists), especially in syncronous mode
+
+	var removed = null;
+	$(document).bind('EntwineElementsRemoved', function(e){ removed = e.targets; });
+
+	monkey('remove', 'html', 'empty', function(){
+		var subtree = removed; removed = null;
+		if (subtree) changes.addSubtree(subtree);
 	});
 
-	monkey('after', 'before', 'remove', 'detach', function(){
-		changes.addSubtree(this.parent());
-	})
+	// We also need to know when an attribute, class, etc changes. Patch the relevant jQuery methods here
 
 	monkey('removeAttr', function(attr){
 		changes.addAttr(attr, this);
@@ -114,20 +122,7 @@
 		else if (typeof a != 'string') { for (var k in a) changes.addAttr(k, this); }
 	});
 
-	/*
-	These manipulation functions call one or more of the above to do the actual manipulation:
-	appendTo -> append
-	prependTo -> prepend
-	insertBefore -> before
-	insertAfter -> after
-	replaceWith -> before || append
-	replaceAll -> replaceWith
-	text -> empty, appendWith
-	wrapAll -> insertBefore, append
-	wrapInner -> wrapAll || append
-	wrap -> wrapAll
-	unwrap -> replaceWith
-	*/
+	// Add some usefull accessors to $.entwine
 
 	$.extend($.entwine, {
 		/**
@@ -147,13 +142,8 @@
 		 * Called automatically on document.ready
 		 */
 		triggerMatching: function() {
-			changes.addAll(); //.triggerEvent();
+			changes.addAll();
 		}
-	});
-
-	// And on DOM ready, trigger matching once
-	$(function(){
-		$.entwine.triggerMatching();
 	});
 
 })(jQuery);

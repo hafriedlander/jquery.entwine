@@ -42,80 +42,22 @@
 		}
 	});
 
-	var domTrackAdded = false;
-
-	var added = function(els) {
-		if (domTrackAdded !== false) { els = $(els).not(domTrackAdded); domTrackAdded = domTrackAdded.add(els); }
-
+	$(document).bind('EntwineElementsAdded', function(e){
 		// For every namespace
 		for (var k in $.entwine.namespaces) {
 			var namespace = $.entwine.namespaces[k];
-			if (namespace.injectee.onadd) namespace.injectee.onadd.call(els);
+			if (namespace.injectee.onadd) namespace.injectee.onadd.call(e.targets);
 		}
-	};
-
-	var removed = function(els) {
-		// For every namespace
-		for (var k in $.entwine.namespaces) {
-			var namespace = $.entwine.namespaces[k];
-			if (namespace.injectee.onremove) namespace.injectee.onremove.call(els);
-		}
-	};
-
-	// Monkey patch $.fn.domManip to catch all regular jQuery add element calls
-	var _domManip = $.prototype.domManip;
-	$.prototype.domManip = function(args, table, callback) {
-
-		if (!callback.patched) {
-			var original = callback;
-			arguments[2] = function(elem){
-				var rv = original.apply(this, arguments);
-
-				if (elem.nodeType == 1) {
-					added(elem);
-					added(elem.getElementsByTagName('*'));
-				}
-				// Document fragments don't have getElementsByTagName - sad face
-				else if (elem.nodeType == 11) {
-					var node = elem.firstChild;
-					while (node) {
-						if (node.nodeType === 1) { added(node); added(node.getElementsByTagName('*')); }
-						node = node.nextSibling;
-					}
-				}
-
-				return rv;
-			}
-			arguments[2].patched = true;
-		}
-
-		return _domManip.apply(this, arguments);
-	}
-
-	// Monkey patch $.fn.html to catch when jQuery sets innerHTML directly
-	var _html = $.prototype.html;
-	$.prototype.html = function(value) {
-		if (value === undefined) return _html.apply(this, arguments);
-
-		domTrackAdded = $([]);
-		var res = _html.apply(this, arguments);
-		added(this.find('*'));
-		domTrackAdded = false;
-
-		return res;
-	}
-
-	// Monkey patch $.cleanData to catch element removal
-	var _cleanData = $.cleanData;
-	$.cleanData = function( elems ) {
-		removed(elems);
-		return _cleanData( elems );
-	}
-
-	// And on DOM ready, trigger adding once
-	$(function(){
-		added($('*'));
 	});
+
+	$(document).bind('EntwineElementsRemoved', function(e){
+		for (var k in $.entwine.namespaces) {
+			var namespace = $.entwine.namespaces[k];
+			if (namespace.injectee.onremove) namespace.injectee.onremove.call(e.targets);
+		}
+	});
+
+
 
 
 })(jQuery);
