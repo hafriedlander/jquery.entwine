@@ -1,28 +1,28 @@
 (function($){
 
 	// Gets all the child elements of a particular elements, stores it in an array
-	function getElements(store, node) {
-		var i = store.length, next = node.firstChild;
+	function getElements(store, original) {
+		var node, i = store.length, next = original.firstChild;
 
 		while ((node = next)) {
 			if (node.nodeType === 1) store[i++] = node;
 			next = node.firstChild || node.nextSibling;
-			while (!next && (node = node.parentNode)) next = node.nextSibling;
+			while (!next && (node = node.parentNode) && node !== original) next = node.nextSibling;
 		}
 	}
 
-	// This might be faster? Or slower? @todo: benchmark
+	// This might be faster? Or slower? @todo: benchmark.
 	function getElementsAlt(store, node) {
-		if (node.nodeType == 11) {
-			var els = node.childNodes, len = els.length, i = 0;
-			for(; i < len; i++) {
-				getElementsAlt(store, els[i]);
-			}
-		}
-		else {
+		if (node.getElementsByTagName) {
 			var els = node.getElementsByTagName('*'), len = els.length, i = 0, j = store.length;
 			for(; i < len; i++, j++) {
 				store[j] = els[i];
+			}
+		}
+		else if (node.childNodes) {
+			var els = node.childNodes, len = els.length, i = 0;
+			for(; i < len; i++) {
+				getElements(store, els[i]);
 			}
 		}
 	}
