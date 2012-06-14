@@ -82,14 +82,30 @@
 	// If this is true, we've changed something to call cleanData so that we can catch the elements, but we don't
 	// want to call the underlying original $.cleanData
 	var supressActualClean = false;
-	var removed = false;
 
 	// Monkey patch $.cleanData to catch element removal
 	var _cleanData = $.cleanData;
 	$.cleanData = function( elems ) {
-		var event = $.Event('EntwineElementsRemoved');
-		event.targets = elems
-		$(document).triggerHandler(event);
+		// By default we can assume all elements passed are legitimately being removeed
+		var removed = elems;
+
+		// Except if we're supressing actual clean - we might be being called by jQuery "being careful" about detaching nodes
+		// before attaching them. So we need to check to make sure these nodes currently are in a document
+		if (supressActualClean) {
+			var i = 0, len = elems.length, removed = [], ri = 0;
+			for(; i < len; i++) {
+				var node = elems[i], current = node;
+				while (current = current.parentNode) {
+					if (current.nodeType == 9) { removed[ri++] = node; break; }
+				}
+			}
+		}
+
+		if (removed.length) {
+			var event = $.Event('EntwineElementsRemoved');
+			event.targets = removed;
+			$(document).triggerHandler(event);
+		}
 
 		if (!supressActualClean) _cleanData.apply(this, arguments);
 	}
