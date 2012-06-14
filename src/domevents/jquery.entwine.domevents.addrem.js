@@ -35,14 +35,16 @@
 		if (!callback.patched) {
 			var original = callback;
 			arguments[2] = function(elem){
-				var rv = original.apply(this, arguments);
+				var added = [];
 
 				if (!dontTrigger) {
-					var added = [];
-
 					if (elem.nodeType == 1) added[added.length] = elem;
 					getElements(added, elem);
+				}
 
+				var rv = original.apply(this, arguments);
+
+				if (!dontTrigger && added.length) {
 					var event = $.Event('EntwineElementsAdded');
 					event.targets = added;
 					$(document).triggerHandler(event);

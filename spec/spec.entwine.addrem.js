@@ -88,6 +88,28 @@ describe('Entwine', function(){
 				$('#a').html('<div></div><div><div id="b"></div></div>');
 				expect(called).toBeTruthy();
 			});
+
+			it('calls onadd and onremove correctly via replaceWith', function(){
+				var added = [], removed = [], sequence = [];
+
+				$('#a,#b').entwine({
+					onadd: function(){
+						console.debug('added', this);
+						added.push(this.attr('id'));
+						sequence.push(this.attr('id'));
+					},
+					onremove: function(){
+						console.debug('added', this);
+						removed.push(this.attr('id'));
+						sequence.push(this.attr('id'));
+					}
+				});
+
+				$('#a').replaceWith('<div></div><div><div id="b"></div></div>');
+				expect(added).toEqual(['b']);
+				expect(removed).toEqual(['a']);
+				expect(sequence).toEqual(['a', 'b']);
+			});
 		});
 	});
 });
