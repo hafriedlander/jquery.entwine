@@ -1,6 +1,11 @@
 
-document.write([
-'<style type="text/css">',
+// Create a new style element & add it to the document head
+var styleEl = document.createElement('style');
+styleEl.setAttribute('type', 'text/css');
+document.head.appendChild(styleEl);
+
+// Set the style element to style up the inspector panel
+styleEl.innerHTML = [
 	'#entwine-inspector { position: fixed; z-index: 1000001; left: 0; right: 0; height: 400px; background: white; -webkit-box-shadow: 0 5px 40px 0 black; -moz-box-shadow: 0 5px 40px 0 black; }',
 	'#entwine-inspector li { list-style: none; margin: 2px 0; padding: 2px 0; }',
 	'#entwine-inspector li:hover { background: #eee; }',
@@ -20,9 +25,8 @@ document.write([
 
 	'#ei-selectors li { color: #aaa; display: none; }',
 	'#ei-selectors li.matching, #entwine-inspector.show-unmatched #ei-selectors li { display: block; }',
-	'#ei-selectors li.matching { color: black; }',
-'</style>'
-].join("\n"));
+	'#ei-selectors li.matching { color: black; }'
+].join("\n");
 
 jQuery(function($){
 
