@@ -83,6 +83,22 @@ jQuery(function($){
 		});
 	};
 
+	var dumpElement = function(el) {
+		var frag = document.createDocumentFragment();
+		var div = document.createElement('div'); frag.appendChild(div);
+
+		var clone = el.cloneNode(false); $(clone).removeClass('ei-entwined').removeAttr('style');
+
+		var i = clone.attributes.length;
+		while (i--) {
+			var attr = clone.attributes.item(i);
+			if (attr.name != 'class' && attr.name != 'id' && attr.value.length > 20) attr.value = attr.value.substr(0, 18)+'..'+attr.value.substr(-2);
+		}
+
+		div.appendChild(clone);
+		return div.innerHTML;
+	};
+
 	var displaydetails = function(e){
 		e.preventDefault(); e.stopPropagation();
 
@@ -103,18 +119,7 @@ jQuery(function($){
 			var target = $(this);
 
 			var li = $('<li></li>');
-			var clone = $(this.cloneNode(false)); clone.removeClass('ei-entwined'); clone.removeAttr('style');
-
-
-			var i = clone[0].attributes.length;
-			while (i--) {
-				var attr = clone[0].attributes.item(i);
-				if (attr.name != 'class' && attr.name != 'id' && attr.value.length > 20) attr.value = attr.value.substr(0, 18)+'..'+attr.value.substr(-2);
-			}
-
-			li.append(clone);
-
-			li.text(li.html()).attr('data-id', ++ctr).data('el', target).prependTo(lists.elements);
+			li.text(dumpElement(this)).attr('data-id', ++ctr).data('el', target).prependTo(lists.elements);
 
 			var namespaces = $('<ul data-element="'+ctr+'"></ul>').appendTo(columns.namespaces);
 
@@ -210,21 +215,21 @@ jQuery(function($){
 
 		$('.ei-selected').removeClass('ei-selected');
 
-		activatelist('#ei-namespaces ul[data-element='+id+']');
+		activatelist('#ei-namespaces ul[data-element="'+id+'"]');
 	});
 
 	$('#ei-namespaces > ul > li').live('click', function(e){
 		var target = $(e.target), namespace = target.attr('data-namespace');
 		target.addClass('selected').siblings().removeClass('selected');
 
-		activatelist('#ei-methods ul[data-namespace='+namespace+']');
+		activatelist('#ei-methods ul[data-namespace="'+namespace+'"]');
 	});
 
 	$('#ei-methods > ul > li').live('click', function(e){
 		var target = $(e.target), method = target.attr('data-method');
 		target.addClass('selected').siblings().removeClass('selected');
 
-		activatelist('#ei-selectors ul[data-method='+method+']');
+		activatelist('#ei-selectors ul[data-method="'+method+'"]');
 	});
 
 });
