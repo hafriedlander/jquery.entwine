@@ -1,34 +1,39 @@
 
-// Create a new style element & add it to the document head
-var styleEl = document.createElement('style');
-styleEl.setAttribute('type', 'text/css');
-document.head.appendChild(styleEl);
-
-// Set the style element to style up the inspector panel
-styleEl.innerHTML = [
-	'#entwine-inspector { position: fixed; z-index: 1000001; left: 0; right: 0; height: 400px; background: white; -webkit-box-shadow: 0 5px 40px 0 black; -moz-box-shadow: 0 5px 40px 0 black; }',
-	'#entwine-inspector li { list-style: none; margin: 2px 0; padding: 2px 0; }',
-	'#entwine-inspector li:hover { background: #eee; }',
-	'#entwine-inspector li.selected { background: #ddd; }',
-
-	'#ei-columns { overflow: hidden; display: -webkit-box; display: -moz-box; width: 100%; height: 380px; }',
-
-	'.ei-column { height: 380px; width: 1px; -webkit-box-flex: 1; -moz-box-flex: 1; }',
-	'#entwine-inspector .ei-column h1 { display: block; margin: 0; padding: 5px 2px; height: 20px; text-align: center; background: #444; color: #eee; font-size: 14px; font-weight: bold; }',
-	'#entwine-inspector .ei-column ul { overflow-y: scroll; height: 350px; }',
-
-	'#ei-options { overflow: hidden; height: 20px; background: #444; color: #eee; }',
-	'#ei-options label { padding-right: 5px; border-right: 1px solid #eee; }',
-
-	'.ei-entwined:hover, .ei-selected { background: rgba(128,0,0,0.2); }',
-	'.ei-hovernode { position: absolute; z-index: 1000000; background: rgba(0,0,0,0.3); border: 1px solid white; outline: 1px solid white; }',
-
-	'#ei-selectors li { color: #aaa; display: none; }',
-	'#ei-selectors li.matching, #entwine-inspector.show-unmatched #ei-selectors li { display: block; }',
-	'#ei-selectors li.matching { color: black; }'
-].join("\n");
-
 jQuery(function($){
+	// Create a new style element
+	var styleEl = document.createElement('style');
+	styleEl.setAttribute('type', 'text/css');
+	(document.head || document.getElementsByTagName('head')[0]).appendChild(styleEl);
+
+	var inspectorCSS = [
+		'#entwine-inspector { position: fixed; z-index: 1000001; left: 0; right: 0; height: 400px; background: white; -webkit-box-shadow: 0 5px 40px 0 black; -moz-box-shadow: 0 5px 40px 0 black; }',
+		'#entwine-inspector li { list-style: none; margin: 2px 0; padding: 2px 0; }',
+		'#entwine-inspector li:hover { background: #eee; }',
+		'#entwine-inspector li.selected { background: #ddd; }',
+
+		'#ei-columns { overflow: hidden; display: -webkit-box; display: -moz-box; width: 100%; height: 380px; }',
+
+		'.ei-column { height: 380px; width: 1px; -webkit-box-flex: 1; -moz-box-flex: 1; }',
+		'#entwine-inspector .ei-column h1 { display: block; margin: 0; padding: 5px 2px; height: 20px; text-align: center; background: #444; color: #eee; font-size: 14px; font-weight: bold; }',
+		'#entwine-inspector .ei-column ul { overflow-y: scroll; height: 350px; }',
+
+		'#ei-options { overflow: hidden; height: 20px; background: #444; color: #eee; }',
+		'#ei-options label { padding-right: 5px; border-right: 1px solid #eee; }',
+
+		'.ei-entwined:hover, .ei-selected { background: rgba(128,0,0,0.2); }',
+		'.ei-hovernode { position: absolute; z-index: 1000000; background: rgba(0,0,0,0.3); border: 1px solid white; outline: 1px solid white; }',
+
+		'#ei-selectors li { color: #aaa; display: none; }',
+		'#ei-selectors li.matching, #entwine-inspector.show-unmatched #ei-selectors li { display: block; }',
+		'#ei-selectors li.matching { color: black; }'
+	].join("\n");
+
+	// Set the style element to style up the inspector panel
+	if(styleEl.styleSheet){
+		styleEl.styleSheet.cssText = inspectorCSS;
+	}else{
+		styleEl.appendChild(document.createTextNode(inspectorCSS));
+	}
 
 	var inspectorPanel = $('<div id="entwine-inspector" class="show-unmatched"></div>').appendTo('body');
 	var columnHolder = $('<div id="ei-columns"></div>').appendTo(inspectorPanel);
