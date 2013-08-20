@@ -954,6 +954,9 @@ catch (e) {
 			else {
 				// We're in a namespace, so we build a Class that subclasses the jQuery Object Class to inject namespace functions into
 				this.$ = $.sub ? $.sub() : sub();
+				// Work around bug in sub() - subclass must share cache with root or data won't get cleared by cleanData
+				this.$.cache = $.cache;
+
 				this.injectee = this.$.prototype;
 
 				// We override entwine to inject the name of this namespace when defining blocks inside this namespace
