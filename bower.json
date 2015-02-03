@@ -1,0 +1,9 @@
+{
+	"name": "jquery.entwine",
+	"main": "dist/jquery.entwine-dist.js",
+	"dependencies": {
+		"jquery": ">=1.7.0"
+	},
+	"ignore": [],
+	"private": false
+}
