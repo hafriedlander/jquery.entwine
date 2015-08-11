@@ -281,22 +281,17 @@ describe('Entwine', function(){
 			$('#a').entwine('foo').foo();
 			expect($('#a').data('foo')).toEqual('foo');
 
+			var a = $('#a')[0];
+
 			// Check cache is shared between root & namespace
-			var rootInitialCacheKeys = $.map($.cache, function(v, k){ return k; });
-			var namespaceInitialCacheKeys = $.map($.entwine.namespaces['foo'].$.cache, function(v, k){ return k; });
+			expect($.hasData(a)).toBeTruthy();
+			expect($.entwine.namespaces['foo'].$.hasData(a)).toBeTruthy();
 
-			expect(rootInitialCacheKeys).toEqual(namespaceInitialCacheKeys);
+			// Remove data and check cache is still shared
+			$.removeData(a, 'foo');
 
-			// Remove '#a', and check cache is still shared
-			$('#a').remove();
-			var rootEventualCacheKeys = $.map($.cache, function(v, k){ return k; });
-			var namespaceEventualCacheKeys = $.map($.entwine.namespaces['foo'].$.cache, function(v, k){ return k; });
-
-			expect(rootEventualCacheKeys).toEqual(namespaceEventualCacheKeys);
-
-			// And that it's now smaller that it used to be
-			expect(namespaceEventualCacheKeys.length).toBeLessThan(namespaceInitialCacheKeys.length);
-
+			expect($.hasData(a)).toBeFalsy();
+			expect($.entwine.namespaces['foo'].$.hasData(a)).toBeFalsy();
 		});
 	});
 
